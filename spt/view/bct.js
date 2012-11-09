@@ -1,7 +1,4 @@
 Ext.require([
-    //'Ext.form.*',
-    //'Ext.layout.container.Column',
-    //'Ext.tab.Panel'
     '*'
 ]);
 
