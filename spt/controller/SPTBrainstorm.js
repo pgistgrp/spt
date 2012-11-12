@@ -1,14 +1,14 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords'],
+    stores: ['SPTKeywords', 'SPTConcerns', 'SPTWorkflows'],
     
-    models: ['SPTKeyword'],
+    models: ['SPTKeyword', 'SPTConcern'],
     
-    views: ['bct.Brainstorm' ],
+    views: ['bct.Brainstorm'],
         
     refs: [
-           {ref: 'brainstorm', selector: 'brainstorm'},
+           {ref: 'brainstormView', selector: 'brainstorm'},
            {ref: 'feedbackForm', selector: 'brainstorm #feedbackForm'},
            {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'}
         ],
@@ -49,9 +49,6 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 			keywordStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/prepareConcern/' + feedbackText;
 			
 			keywordStore.load(function(records, operation, success) {
-				console.log(records);
-				console.log(keywordStore.data.length);
-			
 				var checkboxconfigs = [];
 				for ( var i = 0; i < records.length; i++) {
 					for(var j = 0; j < records[i].data.tags.length; j++){
@@ -79,13 +76,24 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 				
 				var addManualButton = Ext.create('Ext.Button',{
 					text : 'Add Keyphrase',
-					action: 'addkeyword',
-					alignTo: 'manualTag'
+					action: 'addkeyword'
 				});
 		
 				feedbackForm.add(keywordGroup);
 				feedbackForm.add(manualTag);
 				feedbackForm.add(addManualButton);
+				
+				var submitButton = Ext.create('Ext.Button',{
+					text : 'Submit',
+					action: 'submit'
+				});
+				var cancelButton = Ext.create('Ext.Button',{
+					text : 'Cancel',
+					action: 'cancel'
+				});
+				
+				feedbackForm.add(submitButton);
+				feedbackForm.add(cancelButton);
 				
 			});
     	}
@@ -110,7 +118,34 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     },
     
     saveConcern: function(button){
-    	console.log('submit');
+    	var feedbackForm = this.getFeedbackForm();
+    	var keywordGroup = feedbackForm.getComponent('keywordGroup');
+    	var selectedTags = keywordGroup.getChecked();
+        
+    	if(selectedTags.length <2){
+    		alert('Please select at least 2 keywords');
+        }else{
+        	var concernStore = this.getSPTConcernsStore();
+        	var workflow = this.getSPTWorkflowsStore().getAt(0);
+        	
+//        	var selectedTagsString = '';
+//        	for (i=0; i<selectedTags.length; i++){
+//        		selectedTagsString += selectedTags[i].toString()+ ',';  
+//        	}
+        	
+        	concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/saveConcern/' 
+        		+ this.getFeedbackTextArea().getValue() 
+        		+ '/'+ 'sample data, sample documentation' + '/'+ 'Gateway'
+        		+ '/'+ workflow.get('workflowId')
+        		+ '/'+ workflow.get('contextId') 
+        		+ '/'+ workflow.get('activityId') 
+        		;  
+        	console.log(concernStore.getProxy().url);
+        	
+        	concernStore.load(function(records, operation, success) {
+        		console.log(records.length);
+        	});
+        }
     },
     
     cancelConcern: function(button){

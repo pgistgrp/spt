@@ -15,8 +15,9 @@ initComponent: function() {
         		collapsible: true,
         		itemId: 'feedbackForm',
         		frame: true,
-        		height:400,
+        		height:275,
     			width: 350,
+    			overflowY: 'auto',
         		bodyPadding: 5,
         		fieldDefaults: {
             	msgTarget: 'side',
@@ -28,24 +29,15 @@ initComponent: function() {
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
             		height:200,
-    				width: 350,
+    				width: 305,
             		grow: true,
             		allowBlank: false}],
 				buttons: [{
             	text: 'Continue',
             	action: 'getkeywords'
-            	}]	
+            	}]
        		}]
        		
-       	this.buttons = [{text: 'Submit',
-            	action: 'submit',
-            	itemId: 'submit'
-            	},
-            	{text: 'Cancel',
-            	action: 'cancel',
-            	itemId:'cancel'
-            	}]
-
  this.callParent(arguments);
 }
 });
