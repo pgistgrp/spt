@@ -76,7 +76,8 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 				
 				var addManualButton = Ext.create('Ext.Button',{
 					text : 'Add Keyphrase',
-					action: 'addkeyword'
+					action: 'addkeyword',
+					itemId: 'manualBtn'
 				});
 		
 				feedbackForm.add(keywordGroup);
@@ -85,11 +86,13 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 				
 				var submitButton = Ext.create('Ext.Button',{
 					text : 'Submit',
-					action: 'submit'
+					action: 'submit',
+					itemId: 'submitBtn'
 				});
 				var cancelButton = Ext.create('Ext.Button',{
 					text : 'Cancel',
-					action: 'cancel'
+					action: 'cancel',
+					itemId: 'cancelBtn'
 				});
 				
 				feedbackForm.add(submitButton);
@@ -126,29 +129,44 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     		alert('Please select at least 2 keywords');
         }else{
         	var concernStore = this.getSPTConcernsStore();
-        	var workflow = this.getSPTWorkflowsStore().getAt(0);
+        	//var workflow = this.getSPTWorkflowsStore().getAt(0);
         	
-//        	var selectedTagsString = '';
-//        	for (i=0; i<selectedTags.length; i++){
-//        		selectedTagsString += selectedTags[i].toString()+ ',';  
-//        	}
+        	var selectedTagsString = '';
+        	for (i=0; i<selectedTags.length; i++){
+        		selectedTagsString += selectedTags[i].getName()+ ',';  
+        	}
         	
         	concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/saveConcern/' 
         		+ this.getFeedbackTextArea().getValue() 
-        		+ '/'+ 'sample data, sample documentation' + '/'+ 'Gateway'
-        		+ '/'+ workflow.get('workflowId')
-        		+ '/'+ workflow.get('contextId') 
-        		+ '/'+ workflow.get('activityId') 
+        		+ '/'+ selectedTagsString 
+        		+ '/'+ '3039'
         		;  
-        	console.log(concernStore.getProxy().url);
         	
         	concernStore.load(function(records, operation, success) {
         		console.log(records.length);
+        		//in the future save to concern store 
         	});
+        	
+        	this.resetForm();
         }
     },
     
     cancelConcern: function(button){
-    	console.log('cancel');
+    	this.resetForm();
+    },
+    
+    resetForm: function(){
+    	var feedbackForm = this.getFeedbackForm();
+    	
+    	feedbackForm.getForm().reset();
+    	
+    	feedbackForm.remove('keywordGroup');
+		feedbackForm.remove('manualTag');
+		feedbackForm.remove('manualBtn');
+		
+		feedbackForm.remove('submitBtn');
+		feedbackForm.remove('cancelBtn');
+		var continueBtn = feedbackForm.queryById('continueBtn');
+		continueBtn.setVisible(true);
     }
 });

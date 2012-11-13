@@ -34,7 +34,8 @@ initComponent: function() {
             		allowBlank: false}],
 				buttons: [{
             	text: 'Continue',
-            	action: 'getkeywords'
+            	action: 'getkeywords',
+            	itemId: 'continueBtn'
             	}]
        		}]
        		
