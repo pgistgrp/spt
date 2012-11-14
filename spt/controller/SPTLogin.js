@@ -15,7 +15,7 @@ Ext.define('SPT.controller.SPTLogin', {
     		 model: 'LoginUser',
     		 proxy: {
     		    type: 'jsonp',
-    		    url : 'http://localhost:8080/dwr/jsonp/SystemAgent/loadUserByName/',
+    		    url : 'http://http://pgistdev.geog.washington.edu:8080/dwr/jsonp/SystemAgent/loadUserByName/',
     		    reader: {
     		       type: 'json',
     		       root: 'reply'
@@ -23,7 +23,7 @@ Ext.define('SPT.controller.SPTLogin', {
     		  }
     	 });
     			
-    	loginStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/SystemAgent/loadUserByName/' + username +'/' + token + '/'+ "cybergis";
+    	loginStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/SystemAgent/loadUserByName/' + username +'/' + token + '/'+ 'cybergis';
     	loginStore.load(function(records, operation, success) {
 			console.log(records);
 		});

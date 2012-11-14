@@ -46,7 +46,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 			
 			var feedbackText = this.getFeedbackTextArea().getValue();
 			
-			keywordStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/prepareConcern/' + feedbackText;
+			keywordStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/prepareConcern/' + feedbackText;
 			
 			keywordStore.load(function(records, operation, success) {
 				var checkboxconfigs = [];
@@ -136,10 +136,10 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         		selectedTagsString += selectedTags[i].getName()+ ',';  
         	}
         	
-        	concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/saveConcern/' 
+        	concernStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/saveConcern/' 
         		+ this.getFeedbackTextArea().getValue() 
         		+ '/'+ selectedTagsString 
-        		+ '/'+ '3039'
+        		+ '/'+ '10803'
         		;  
         	
         	concernStore.load(function(records, operation, success) {
