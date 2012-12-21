@@ -1,7 +1,13 @@
 Ext.define('SPT.store.SPTWorkflows', {
     extend: 'Ext.data.Store',
-    fields: ['name','workflowId', 'contextId', 'activityId'],
-    data: [
-        {name: 'Feedback', workflowId: '2837', contextId: '2857', activityId: '2850'}
-    ]
+    id: 'workflowStore',
+    model: 'SPT.model.SPTWorkflow',
+    proxy: {
+        type: 'jsonp',
+        url : 'http://localhost:8080/dwr/jsonp/WorkflowAgent/getOpenWorkflows/',
+        reader: {
+            type: 'json',
+			root: 'reply'
+        }
+    }
 });
