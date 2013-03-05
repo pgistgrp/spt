@@ -7,15 +7,18 @@ Ext.define('SPT.controller.SPTLogin', {
     		 fields:[{name:'successful', type:'boolean'},{name:'error', type:'String'}]
     	 });
     			
+    	 //var username = CG.global.Env.authuser;
+    	 //var token = CG.global.Env.token;
+    	 
     	 var username = 'roderimj';
-    	 var token = 'cybergis_token_SngrQdcC6nlpTwDB'
+    	 var token = 'cybergis_token_4wAA84E4K3uY5o5W';
     		    
     	 var loginStore = Ext.create('Ext.data.Store', {
     		 id: 'loginStore',
     		 model: 'LoginUser',
     		 proxy: {
     		    type: 'jsonp',
-    		    url : 'http://http://pgistdev.geog.washington.edu:8080/dwr/jsonp/SystemAgent/loadUserByName/',
+    		    url : 'http://localhost:8080/dwr/jsonp/SystemAgent/loadUserByName/',
     		    reader: {
     		       type: 'json',
     		       root: 'reply'
@@ -23,9 +26,16 @@ Ext.define('SPT.controller.SPTLogin', {
     		  }
     	 });
     			
-    	loginStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/SystemAgent/loadUserByName/' + username +'/' + token + '/'+ 'cybergis';
+    	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
     	loginStore.load(function(records, operation, success) {
-			console.log(records);
+    		var record = loginStore.getAt(0);
+    		if(! record.get('successful')){
+    			  Ext.Msg.show({
+                      title: 'Login failed',
+                      msg: record.get('error'),
+                      buttons: Ext.Msg.OK
+                  });	
+    		};
 		});
 }
 

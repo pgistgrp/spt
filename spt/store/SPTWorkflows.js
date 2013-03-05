@@ -7,7 +7,10 @@ Ext.define('SPT.store.SPTWorkflows', {
         url : 'http://localhost:8080/dwr/jsonp/WorkflowAgent/getOpenWorkflows/',
         reader: {
             type: 'json',
-			root: 'reply'
+			root: 'reply',
+			totalProperty: 'openRunningTotal',
+			sucessfulProperty: 'successful',
+			messageProperty:'reason'
         }
     }
 });

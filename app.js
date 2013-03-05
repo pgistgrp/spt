@@ -8,8 +8,10 @@ Ext.application({
     	'SPTBrainstorm'
     ],
     
+    
     launch: function() {
-        Ext.create('Ext.container.Viewport', {
+    	
+    	Ext.create('Ext.container.Viewport', {
             layout: 'vbox',
             items: [
                	{
@@ -26,4 +28,5 @@ Ext.application({
             ]
         });
     }
+    
 });

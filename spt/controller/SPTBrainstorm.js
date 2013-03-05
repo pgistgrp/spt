@@ -8,16 +8,12 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     views: ['bct.Brainstorm'],
         
     refs: [
-           {ref: 'brainstormView', selector: 'brainstorm'},
            {ref: 'feedbackForm', selector: 'brainstorm #feedbackForm'},
            {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'}
         ],
 
     init: function() {
         this.control({
-            'viewport > panel': {
-            	 renderTo: Ext.getBody()
-            },
             
             'brainstorm button[action=getkeywords]': {
                 click: this.getKeywords
@@ -46,7 +42,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 			
 			var feedbackText = this.getFeedbackTextArea().getValue();
 			
-			keywordStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/prepareConcern/' + feedbackText;
+			keywordStore.getProxy().url = keywordStore.getProxy().url + feedbackText;
 			
 			keywordStore.load(function(records, operation, success) {
 				var checkboxconfigs = [];
@@ -129,17 +125,20 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     		alert('Please select at least 2 keywords');
         }else{
         	var concernStore = this.getSPTConcernsStore();
-        	//var workflow = this.getSPTWorkflowsStore().getAt(0);
+        	var workflowRecord = this.getSPTWorkflowsStore().getAt(0);
+    		var openWorkflowsStore = workflowRecord.openWorkflows();
+    		var index = openWorkflowsStore.find('selected', true);
+    		var currentWorkflow = openWorkflowsStore.getAt(index);
         	
         	var selectedTagsString = '';
         	for (i=0; i<selectedTags.length; i++){
         		selectedTagsString += selectedTags[i].getName()+ ',';  
         	}
         	
-        	concernStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/saveConcern/' 
+        	concernStore.getProxy().url = concernStore.getProxy().url
         		+ this.getFeedbackTextArea().getValue() 
         		+ '/'+ selectedTagsString 
-        		+ '/'+ '10803'
+        		+ '/'+ currentWorkflow.get('id');
         		;  
         	
         	concernStore.load(function(records, operation, success) {

@@ -6,18 +6,21 @@ Ext.define('SPT.view.workflow.Workflow' ,{
     
 
 initComponent: function() {
-	 this.items = [{
+	
+	this.items = [{
 	     xtype: 'form',
 	     padding: '5 5 0 5',
 	     border: false,
 	     frame: true,
-	     height:30,
+	     height:50,
 	     width:350,
 	     items: [{
 			xtype: 'combobox',
 			fieldLabel: 'Choose a discussion topic:',
-			displayField: 'name',
 			labelWidth: 150,
+			width:340,
+			displayField: 'name',
+			valueField: 'id',
 			store: 'SPTWorkflows',
 			queryMode: 'local',
 			forceSelection: 'true'

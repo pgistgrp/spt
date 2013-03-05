@@ -5,27 +5,44 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     
     models: ['SPTWorkflow'],
     
-    views: [
-            'workflow.Workflow'
-        ],
-
+    views: ['workflow.Workflow'],
+    
     init: function() {
-    	var workflowStore = this.getSPTWorkflowsStore();
-    	workflowStore.load(function(records, operation, success) {
-    		var record = workflowStore.getAt(0);
-    		console.log(record);
-    		
-    		var openWorkflows = record.getAssociatedData();
-    		console.log(openWorkflows);
-    		
-    		var ow = record.openWorkflows().getAt(0);
-    		console.log(ow.get('name'));
-		});
     	
         this.control({
-            'viewport > panel': {
-            	 renderTo: Ext.getBody()
+            'viewport > workflow combobox': {
+            	beforerender: this.getOpenWorkflows,
+            	select: this.setCurrentWorkflow
             }
         });
-    }
+    },
+
+	getOpenWorkflows: function(combobox){
+		var workflowStore = this.getSPTWorkflowsStore();
+    	workflowStore.load(function(records, operation, success) {
+    		var record = workflowStore.getAt(0);
+    		var openWorkflowsStore = record.openWorkflows();
+    		combobox.store = openWorkflowsStore;
+    	});
+		
+	},
+    
+    setCurrentWorkflow: function(combobox){
+    	//switch user's current workflow by changing selected status
+    	var store = combobox.store;
+    	var id = store.find('selected', true);
+    	
+    	//if none previously selected index will be -1
+    	if(id != -1){
+    		var previousCurrentWorkflow = store.getAt(id);
+    		previousCurrentWorkflow.set('selected', false);
+    	}
+    	
+    	//set new current workflow
+    	var rec = combobox.findRecord(
+    	        combobox.valueField || combobox.displayField,
+    	        combobox.getValue()
+    	    );
+    	rec.set('selected', true);
+	}
 });
