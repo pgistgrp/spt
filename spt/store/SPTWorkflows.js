@@ -1,7 +1,7 @@
 Ext.define('SPT.store.SPTWorkflows', {
     extend: 'Ext.data.Store',
     id: 'workflowStore',
-    model: 'SPT.model.SPTWorkflow',
+    model: 'SPT.model.SPTWorkflows',
     proxy: {
         type: 'jsonp',
         url : 'http://localhost:8080/dwr/jsonp/WorkflowAgent/getOpenWorkflows/',

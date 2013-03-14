@@ -3,7 +3,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
 
     stores: ['SPTWorkflows'],
     
-    models: ['SPTWorkflow'],
+    models: ['SPTWorkflows'],
     
     views: ['workflow.Workflow'],
     

@@ -1,4 +1,4 @@
-Ext.define('SPT.model.SPTWorkflow', {
+Ext.define('SPT.model.SPTWorkflows', {
     extend: 'Ext.data.Model',
     associations:[{type:'hasMany', model: 'OpenWorkflows', name: 'openWorkflows'}]
 });
@@ -6,5 +6,5 @@ Ext.define('SPT.model.SPTWorkflow', {
 Ext.define('OpenWorkflows', {
     extend: 'Ext.data.Model',
     fields: ['name','id', {name: 'selected', type: 'boolean', defaultValue: false}],
-    belongsTo: 'SPT.model.SPTWorkflow'
+    belongsTo: 'SPT.model.SPTWorkflows'
 });
