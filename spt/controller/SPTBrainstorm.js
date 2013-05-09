@@ -1,7 +1,7 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords', 'SPTConcerns', 'SPTWorkflows'],
+    stores: ['SPTKeywords', 'SPTConcerns', 'SPTWorkflows', 'SPTWorkflow'],
     
     models: ['SPTKeyword', 'SPTConcern'],
     
@@ -125,10 +125,21 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     		alert('Please select at least 2 keywords');
         }else{
         	var concernStore = this.getSPTConcernsStore();
+        	
+        	//get current workflow
         	var workflowRecord = this.getSPTWorkflowsStore().getAt(0);
     		var openWorkflowsStore = workflowRecord.openWorkflows();
     		var index = openWorkflowsStore.find('selected', true);
     		var currentWorkflow = openWorkflowsStore.getAt(index);
+    		
+    		//get BCT contextid and activityid, TODO: fix assumption that brainstorm is only method
+    		var bctIndex = this.getSPTWorkflowStore().find('workflowId',currentWorkflow.get('id'));
+    		var brainstormMethod = this.getSPTWorkflowStore().getAt(bctIndex);
+    		var contextId = brainstormMethod.get('contextId');
+    		var brainstormGamesStore = brainstormMethod.pgameActivityList();
+    		var activityId = brainstormGamesStore.getAt(0).get('activityId');
+    		
+    		console.log("wf=" + currentWorkflow.get('id') + "cxt="+ contextId + "act="+ activityId);
         	
         	var selectedTagsString = '';
         	for (i=0; i<selectedTags.length; i++){
@@ -138,8 +149,10 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         	concernStore.getProxy().url = concernStore.getProxy().url
         		+ this.getFeedbackTextArea().getValue() 
         		+ '/'+ selectedTagsString 
-        		+ '/'+ currentWorkflow.get('id');
-        		;  
+        		+ '/'+ "CyberGIS Gateway" //TODO: add category select box
+        		+ '/'+ currentWorkflow.get('id')
+        		+ '/'+ contextId
+        		+ '/'+ activityId; 
         	
         	concernStore.load(function(records, operation, success) {
         		console.log(records.length);
