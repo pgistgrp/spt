@@ -41,7 +41,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	if(feedbackForm.getForm().isValid()){
 			
 			var feedbackText = this.getFeedbackTextArea().getValue();
-			
+			var originalUrl = keywordStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 			keywordStore.getProxy().url = keywordStore.getProxy().url + feedbackText;
 			
 			keywordStore.load(function(records, operation, success) {
@@ -95,6 +95,8 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 				feedbackForm.add(cancelButton);
 				
 			});
+			
+			keywordStore.getProxy().url = originalUrl; //reset url to remove parameter
     	}
     },
     
