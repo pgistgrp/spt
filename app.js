@@ -23,7 +23,6 @@ Ext.application({
                 {
                 	region: 'south',
                 	xtype:'brainstorm',
-                	title:'Brainstorm'
                 }
             ]
         });

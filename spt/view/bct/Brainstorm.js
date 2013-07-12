@@ -1,15 +1,14 @@
 Ext.define('SPT.view.bct.Brainstorm' ,{
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.tab.Panel',
     alias: 'widget.brainstorm',
     
     requires: ['Ext.form.Panel'],
 
 initComponent: function() {
- 	 var feedbackText = "";
-	
 	 this.items = [
             {
-                xtype: 'form',
+                title: 'Provide Feedback',
+            	xtype: 'form',
                 padding: '5 5 0 5',
                 border: false,
         		collapsible: true,
@@ -37,7 +36,21 @@ initComponent: function() {
             	action: 'getkeywords',
             	itemId: 'continueBtn'
             	}]
-       		}]
+       		},
+       		{
+       			title: 'View Feedback',
+       			xtype: 'grid',
+       			itemId: 'feedbackView',
+       			store: Ext.data.StoreManager.lookup('SPTConcerns'),
+       			height: 275,
+       		    width: 350,
+       		    columns: [
+       		        { text: 'Contributor',  dataIndex: 'loginname' },
+       		        { text: 'Date', dataIndex: 'creaeTime'},
+       		        { text: 'Concern', dataIndex: 'content'}
+       		    ]
+             }
+       		]
        		
  this.callParent(arguments);
 }
