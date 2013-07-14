@@ -33,7 +33,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
             },
             
             'brainstorm grid': {
-                beforeactivate: this.showConcerns
+                beforerender: this.showConcerns
             }
             
         });
@@ -219,10 +219,8 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 		+ '/'+ wfInfo.getContextId()
 		+ '/'+ wfInfo.getActivityId();
 		
-    	console.log ("showConcerns");
     	
     	concernsStore.load(function(records, operation, success) {
-			console.log (records);
     	});
     	
     	concernsStore.getProxy().url = originalUrl;

@@ -1,6 +1,6 @@
 Ext.define('SPT.store.SPTWorkflows', {
     extend: 'Ext.data.Store',
-    id: 'workflowStore',
+    storeId: 'workflowStore',
     model: 'SPT.model.SPTWorkflows',
     proxy: {
         type: 'jsonp',

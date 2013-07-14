@@ -11,7 +11,7 @@ Ext.define('SPT.controller.SPTLogin', {
     	 //var token = CG.global.Env.token;
     	 
     	 var username = 'roderimj';
-    	 var token = 'cybergis_token_xJBCXYHlV5Hmzhwu';
+    	 var token = 'cybergis_token_H56ltk22g1eix4SR';
     		    
     	 var loginStore = Ext.create('Ext.data.Store', {
     		 id: 'loginStore',

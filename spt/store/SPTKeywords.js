@@ -1,6 +1,6 @@
 Ext.define('SPT.store.SPTKeywords', {
     extend: 'Ext.data.Store',
-	id: 'keywordStore',
+	storeId: 'keywordStore',
     model: 'SPT.model.SPTKeyword',
     proxy: {
         type: 'jsonp',

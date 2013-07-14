@@ -40,18 +40,19 @@ initComponent: function() {
        		{
        			title: 'View Feedback',
        			xtype: 'grid',
+       			selType: 'cellmodel',
        			itemId: 'feedbackView',
        			store: Ext.data.StoreManager.lookup('SPTConcerns'),
        			height: 275,
        		    width: 350,
        		    columns: [
-       		        { text: 'Contributor',  dataIndex: 'loginname' },
-       		        { text: 'Date', dataIndex: 'creaeTime'},
+       		        { text: 'Contributor', dataIndex: 'author'}, 
+       		        { text: 'Date', dataIndex: 'createTime'},
        		        { text: 'Concern', dataIndex: 'content'}
        		    ]
              }
        		]
-       		
+
  this.callParent(arguments);
 }
 });
