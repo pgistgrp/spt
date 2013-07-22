@@ -2,7 +2,8 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     extend: 'Ext.tab.Panel',
     alias: 'widget.brainstorm',
     
-    requires: ['Ext.form.Panel'],
+    requires: ['Ext.form.Panel', 'Ext.grid.*'],
+    
 
 initComponent: function() {
 	 this.items = [
@@ -46,10 +47,24 @@ initComponent: function() {
        			height: 275,
        		    width: 350,
        		    columns: [
-       		        { text: 'Contributor', dataIndex: 'author'}, 
-       		        { text: 'Date', dataIndex: 'createTime'},
-       		        { text: 'Concern', dataIndex: 'content'}
-       		    ]
+       		        { text: 'Contributor', flex: 1, dataIndex: 'author'}, 
+       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:sA'},
+       		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+       		        	var keywords = new Array();
+       		        	var tagsStore = record.tags();
+       		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
+       						var tag = tagsStore.getAt(i);
+       		        		var keyword = tag.get('keyword');
+       		        		keywords[i] = keyword;
+       					}
+       		        	return keywords.toString();
+       		        }}
+       		    ],
+       		    plugins: [{
+                 ptype: 'rowexpander',
+                 rowBodyTpl : new Ext.XTemplate(
+                     '<p><b>Feedback:</b> {content}</p>')
+       		    }]
              }
        		]
 

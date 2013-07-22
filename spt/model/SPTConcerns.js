@@ -1,6 +1,6 @@
  Ext.define('SPT.model.SPTConcerns', {
     extend: 'Ext.data.Model',
-    fields:['content', {name: 'createTime', type: 'date', dateFormat: 'MM/dd/yy, hh:mm'}, 
+    fields:['content', {name: 'createTime', type: 'date', dateFormat: 'm/d/y h:sA'}, 
             {name: 'deleted', type: 'boolean'}, 'id', {name: 'author', mapping: 'author.loginname'}],
     associations: [{type:'hasMany', model: 'ConcernTags', name: 'tags'}]
 });
@@ -8,15 +8,9 @@
 
  Ext.define('ConcernTags', {
 	    extend: 'Ext.data.Model',
-	    fields:['bctId', 'id','times'],
+	    fields:['bctId', 'id','times', {name: 'keyword', mapping: 'tag.name'}],
 	    belongsTo: 'SPT.model.SPTConcerns',
-	    instanceName: 'concern2',
-	    associations:[{type:'hasOne', model: 'ConcernTag', name:'tag'}]
+	    instanceName: 'concern2'
 	});
 
- Ext.define('ConcernTag', {
-	    extend: 'Ext.data.Model',
-	    fields:['count', 'id', 'name', 'status', 'type'],
-	    belongsTo: 'ConcernTags'
-	});
 	
