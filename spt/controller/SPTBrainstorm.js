@@ -145,10 +145,11 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         	concernStore.getProxy().url = concernStore.getProxy().url
         		+ this.getFeedbackTextArea().getValue() 
         		+ '/'+ selectedTagsString 
-        		+ '/'+ "CyberGIS Gateway" //TODO: add category select box
         		+ '/'+ wfInfo.getWorkflowId()
         		+ '/'+ wfInfo.getContextId()
         		+ '/'+ wfInfo.getActivityId(); 
+        	
+        	console.log(concernStore.getProxy().url);
         	
         	concernStore.load(function(records, operation, success) {
         		console.log("saved");

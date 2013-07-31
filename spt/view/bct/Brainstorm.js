@@ -2,10 +2,11 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     extend: 'Ext.tab.Panel',
     alias: 'widget.brainstorm',
     
-    requires: ['Ext.form.Panel', 'Ext.grid.*'],
+    requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.grid.plugin.RowExpander'],
     
 
 initComponent: function() {
+
 	 this.items = [
             {
                 title: 'Provide Feedback',
@@ -47,9 +48,9 @@ initComponent: function() {
        			height: 275,
        		    width: 350,
        		    columns: [
-       		        { text: 'Contributor', flex: 1, dataIndex: 'author'}, 
-       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:sA'},
-       		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+       		        { text: 'Contributor', flex:1, dataIndex: 'author'}, 
+       		        { text: 'Date', colwidth: 5, dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:sA'},
+       		        { text: 'Keywords', flex:2, dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
        		        	var keywords = new Array();
        		        	var tagsStore = record.tags();
        		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
@@ -61,11 +62,15 @@ initComponent: function() {
        		        }}
        		    ],
        		    plugins: [{
-                 ptype: 'rowexpander',
-                 rowBodyTpl : new Ext.XTemplate(
-                     '<p><b>Feedback:</b> {content}</p>')
+                // ptype: 'rowexpander',
+                // rowBodyTpl : new Ext.XTemplate(
+                //     '<p><b>Feedback:</b> {content}</p>')
+       	            ptype: 'dvp_rowexpander',
+       	            pluginId: 'xpander',
+       	            rowBodyTpl : new Ext.XTemplate(
+       	             	'<p><b>Feedback:</b> {content}</p>')
        		    }]
-             }
+       		}
        		]
 
  this.callParent(arguments);
