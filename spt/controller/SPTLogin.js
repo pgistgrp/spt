@@ -7,11 +7,11 @@ Ext.define('SPT.controller.SPTLogin', {
     		 fields:[{name:'successful', type:'boolean'},{name:'error', type:'String'}]
     	 });
     			
-    	 //var username = CG.global.Env.authuser;
-    	 //var token = CG.global.Env.token;
+    	//var username = CG.global.Env.authuser;
+    	//var token = CG.global.Env.token;
     	 
     	 var username = 'roderimj';
-    	 var token = 'cybergis_token_Ak3Sf9UZHnwxyDGH';
+    	 var token = 'cybergis_token_RI6J8nrVj67H0Q4v';
     		    
     	 var loginStore = Ext.create('Ext.data.Store', {
     		 id: 'loginStore',

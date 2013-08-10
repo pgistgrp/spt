@@ -22,10 +22,10 @@ initComponent: function() {
         		bodyPadding: 5,
         		fieldDefaults: {
             	msgTarget: 'side',
-            	labelWidth: 100
+            	labelWidth: 110
         		},
         		items: [{
-            		fieldLabel: 'Please provide your comments and select keywords/phrases or add a custom keyword/phrase below',
+            		fieldLabel: 'Please provide your comments and select at least 2 keywords/phrases or add custom keywords/phrases below',
             		name: 'feedbackTextArea',
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
@@ -49,7 +49,7 @@ initComponent: function() {
        		    width: 350,
        		    columns: [
        		        { text: 'Contributor', flex:1, dataIndex: 'author'}, 
-       		        { text: 'Date', colwidth: 5, dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:sA'},
+       		        { text: 'Date', colwidth: 5, dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
        		        { text: 'Keywords', flex:2, dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
        		        	var keywords = new Array();
        		        	var tagsStore = record.tags();
@@ -62,9 +62,6 @@ initComponent: function() {
        		        }}
        		    ],
        		    plugins: [{
-                // ptype: 'rowexpander',
-                // rowBodyTpl : new Ext.XTemplate(
-                //     '<p><b>Feedback:</b> {content}</p>')
        	            ptype: 'dvp_rowexpander',
        	            pluginId: 'xpander',
        	            rowBodyTpl : new Ext.XTemplate(

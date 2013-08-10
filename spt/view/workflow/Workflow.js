@@ -23,7 +23,8 @@ initComponent: function() {
 			valueField: 'id',
 			store: 'SPTWorkflows',
 			queryMode: 'local',
-			forceSelection: true
+			forceSelection: true,
+			lastQuery: ''
 	     }]
 	 }];
 

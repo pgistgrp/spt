@@ -1,7 +1,7 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns', 'SPTWorkflows', 'SPTWorkflow'],
+    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns'],
     
     models: ['SPTKeyword', 'SPTConcern', 'SPTConcerns'],
     
@@ -9,8 +9,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         
     refs: [
            {ref: 'feedbackForm', selector: 'brainstorm #feedbackForm'},
-           {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'},
-           {ref: 'feedbackView', selector: 'brainstorm grid'}
+           {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'}
         ],
 
     init: function() {
@@ -46,7 +45,8 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	
     	if(feedbackForm.getForm().isValid()){
 			
-			var feedbackText = this.getFeedbackTextArea().getValue();
+			var feedbackText = escape(this.getFeedbackTextArea().getValue());
+			
 			var originalUrl = keywordStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 			keywordStore.getProxy().url = keywordStore.getProxy().url + feedbackText;
 			
@@ -124,13 +124,25 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	
     },
     
+    getSelectWorkflowMsg: function(){
+    	return Ext.Msg.show({
+            title: 'SPT Help',
+            msg: 'Please select a discussion topic',
+            buttons: Ext.Msg.OK
+        });	
+    },
+    
     saveConcern: function(button){
     	var feedbackForm = this.getFeedbackForm();
     	var keywordGroup = feedbackForm.getComponent('keywordGroup');
     	var selectedTags = keywordGroup.getChecked();
         
     	if(selectedTags.length <2){
-    		alert('Please select at least 2 keywords');
+    		  Ext.Msg.show({
+                  title: 'SPT Help',
+                  msg: 'Please select at least 2 keywords',
+                  buttons: Ext.Msg.OK
+              });
         }else{
         	var concernStore = this.getSPTConcernStore();
         	
@@ -139,24 +151,31 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         		selectedTagsString += selectedTags[i].getName()+ ',';  
         	}
         	
-        	var wfInfo = this.getCurrentWorkflowInfo();
-        	var originalUrl = concernStore.getProxy().url;
+        	var wfInfo = this.getController('SPTWorkflowInit').getCurrentWorkflowInfo();
+        	if (wfInfo == null){
+        		this.getSelectWorkflowMsg();
+        	}else{
         	
-        	concernStore.getProxy().url = concernStore.getProxy().url
-        		+ this.getFeedbackTextArea().getValue() 
-        		+ '/'+ selectedTagsString 
-        		+ '/'+ wfInfo.getWorkflowId()
-        		+ '/'+ wfInfo.getContextId()
-        		+ '/'+ wfInfo.getActivityId(); 
-        	
-        	console.log(concernStore.getProxy().url);
-        	
-        	concernStore.load(function(records, operation, success) {
-        		console.log("saved");
-        	});
-        	
-        	concernStore.getProxy().url = originalUrl;
-        	this.resetForm();
+	        	var originalUrl = concernStore.getProxy().url;
+	        	
+	        	var encodedFeedback = escape(this.getFeedbackTextArea().getValue());
+	        	
+	        	concernStore.getProxy().url = concernStore.getProxy().url
+	        		+ encodedFeedback
+	        		+ '/'+ selectedTagsString 
+	        		+ '/'+ wfInfo.getWorkflowId()
+	        		+ '/'+ wfInfo.getContextId()
+	        		+ '/'+ wfInfo.getActivityId(); 
+	        	
+	        	concernStore.load(function(records, operation, success) {
+	        		console.log("saved");
+	        	});
+	        	
+	        	concernStore.getProxy().url = originalUrl;
+	        	this.resetForm();
+	        	
+	        	this.getController('SPTWorkflowInit').getConcerns();
+        	}	
         }
     },
     
@@ -179,52 +198,13 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 		continueBtn.setVisible(true);
     },
     
-    getCurrentWorkflowInfo: function(){
-    	//get current workflow
-    	var workflowRecord = this.getSPTWorkflowsStore().getAt(0);
-		var openWorkflowsStore = workflowRecord.openWorkflows();
-		var index = openWorkflowsStore.find('selected', true);
-		var currentWorkflow = openWorkflowsStore.getAt(index);
-		var wfId = currentWorkflow.get('id');
-		
-		//get BCT contextid and activityid, TODO: fix assumption that brainstorm is only method
-		var bctIndex = this.getSPTWorkflowStore().find('workflowId', wfId);
-		var brainstormMethod = this.getSPTWorkflowStore().getAt(bctIndex);
-		var cxtId = brainstormMethod.get('contextId');
-		var brainstormGamesStore = brainstormMethod.pgameActivityList();
-		var actId = brainstormGamesStore.getAt(0).get('activityId');
-		
-		Ext.define('WorkflowInfo', {
-   	     config: {
-   	         workflowId: wfId,
-   	         contextId: cxtId,
-   	         activityId: actId,
-   	     },
-   	     constructor: function(cfg) {
-   	         this.initConfig(cfg);
-   	     }
-		}); 
-
-		return new WorkflowInfo();
-    },
-    
-    
+  
     showConcerns: function(grid){
-    	var concernsStore = this.getSPTConcernsStore();
-    	var wfInfo = this.getCurrentWorkflowInfo();
+    	var wfInfo = this.getController('SPTWorkflowInit').getCurrentWorkflowInfo();
     	
-    	var originalUrl = concernsStore.getProxy().url;
-    	
-    	concernsStore.getProxy().url = concernsStore.getProxy().url
-    	+ wfInfo.getWorkflowId()
-		+ '/'+ wfInfo.getContextId()
-		+ '/'+ wfInfo.getActivityId();
-		
-    	
-    	concernsStore.load(function(records, operation, success) {
-    	    console.log(records);
-    	});
-    	
-    	concernsStore.getProxy().url = originalUrl;
+    	if (wfInfo == null){
+    		this.getSelectWorkflowMsg();
+    	}
+
     }
 });
