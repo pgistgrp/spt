@@ -205,6 +205,5 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	if (wfInfo == null){
     		this.getSelectWorkflowMsg();
     	}
-
     }
 });

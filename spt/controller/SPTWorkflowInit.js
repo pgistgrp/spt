@@ -7,12 +7,15 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     
     views: ['workflow.Workflow'],
     
+    refs: [
+           {ref: 'workflowCombobox', selector: 'workflow #workflowCombobox'}
+        ],
     
     init: function() {
-    	//once specific workflow is selected, get associated concerns
-    	this.getSPTWorkflowStore().addListener('load',this.getConcerns, this);
+       //once specific workflow is selected & loaded, get associated concerns
+       this.getSPTWorkflowStore().addListener('load',this.getConcerns, this);
     	
-        this.control({
+       this.control({
             'workflow combobox': {
             	beforerender: this.getOpenWorkflows,
             	select: this.setCurrentWorkflow,
@@ -27,8 +30,9 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     		var record = workflowStore.getAt(0);
     		var openWorkflowsStore = record.openWorkflows();
     		combobox.store = openWorkflowsStore;
+    		console.log('loadopenwf');
+    		this.fireEvent('afterload');
     	});
-		
 	},
 	
     getConcerns: function(){
@@ -47,7 +51,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     		
         	
         	concernsStore.load(function(records, operation, success) {
-        	    console.log(records);
+        	    console.log('getconcerns');
         	});
         	
         	concernsStore.getProxy().url = originalUrl;
@@ -56,7 +60,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     
     setCurrentWorkflow: function(combobox){
     	//switch user's current workflow by changing selected status
-    	var store = combobox.store; //actually SPTWorkflowsStore
+    	var store = combobox.store; 
     	var id = store.find('selected', true);
     	
     	//if none previously selected index will be -1
@@ -77,12 +81,10 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     	var originalUrl = activeWorkflowStore.getProxy().url; //workaround: temp variable for storing proxy url without param
     	activeWorkflowStore.getProxy().url = activeWorkflowStore.getProxy().url + rec.get('id');
     	activeWorkflowStore.load(function(records, operation, success) {
-    		console.log(records);
+    		console.log('loadactivewf');
     	});
     	
     	activeWorkflowStore.getProxy().url = originalUrl; //reset url to remove parameter
-    	
-    	
 	},
 	
 	getCurrentWorkflowInfo: function(){
@@ -126,5 +128,12 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
         });	
     },
     
+   selectWorkflow: function (workflowName){
+	   var wfCombo = this.getWorkflowCombobox();
+   	   var wfIndex = wfCombo.store.find('name', workflowName);
+   	   wfCombo.select(wfCombo.store.data.items[wfIndex]);
+   	   //call to select doesn't fire 'select' event, so calling method explicitly
+   	   this.setCurrentWorkflow(wfCombo);
+   }
 
 });

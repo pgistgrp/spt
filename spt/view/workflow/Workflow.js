@@ -16,6 +16,7 @@ initComponent: function() {
 	     width:350,
 	     items: [{
 			xtype: 'combobox',
+			itemId:'workflowCombobox',
 			fieldLabel: 'Choose a discussion topic:',
 			labelWidth: 150,
 			width:340,
