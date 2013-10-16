@@ -1,8 +1,11 @@
 Ext.define('SPT.view.bct.Brainstorm' ,{
     extend: 'Ext.tab.Panel',
     alias: 'widget.brainstorm',
+    autoHeight: true,
+    minHeight: 400,
     
-    requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.grid.plugin.RowExpander'],
+    //requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.grid.plugin.RowExpander'],
+    requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.RowExpander'],
     
 
 initComponent: function() {
@@ -16,7 +19,8 @@ initComponent: function() {
         		collapsible: true,
         		itemId: 'feedbackForm',
         		frame: true,
-        		height:275,
+        		//height:275,
+        		autoHeight: true,
     			width: 350,
     			overflowY: 'auto',
         		bodyPadding: 5,
@@ -62,10 +66,10 @@ initComponent: function() {
        		        }}
        		    ],
        		    plugins: [{
-       	            ptype: 'dvp_rowexpander',
-       	            pluginId: 'xpander',
-       	            rowBodyTpl : new Ext.XTemplate(
-       	             	'<p><b>Feedback:</b> {content}</p>')
+       	            //ptype: 'dvp_rowexpander',
+       	            ptype: 'rowexpander',
+       	            //pluginId: 'xpander',
+       	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
        		    }]
        		}
        		]
