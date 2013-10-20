@@ -5,11 +5,14 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     minHeight: 400,
     
     //requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.grid.plugin.RowExpander'],
-    requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.RowExpander'],
+    requires: ['Ext.form.Panel', 
+               'Ext.grid.*', 
+               'Ext.ux.RowExpander', 
+               'Ext.form.field.Text',],
     
 
 initComponent: function() {
-
+	 this.editing = Ext.create('Ext.grid.plugin.CellEditing');
 	 this.items = [
             {
                 title: 'Provide Feedback',
@@ -19,7 +22,6 @@ initComponent: function() {
         		collapsible: true,
         		itemId: 'feedbackForm',
         		frame: true,
-        		//height:275,
         		autoHeight: true,
     			width: 350,
     			overflowY: 'auto',
@@ -49,12 +51,13 @@ initComponent: function() {
        			selType: 'cellmodel',
        			itemId: 'feedbackView',
        			store: Ext.data.StoreManager.lookup('SPTConcerns'),
-       			height: 275,
+       			autoHeight: true,
        		    width: 350,
+       		    forceFit: true,
        		    columns: [
-       		        { text: 'Contributor', flex:1, dataIndex: 'author'}, 
-       		        { text: 'Date', colwidth: 5, dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Keywords', flex:2, dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+       		        { text: 'Contributor', dataIndex: 'author'}, 
+       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
+       		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
        		        	var keywords = new Array();
        		        	var tagsStore = record.tags();
        		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
@@ -63,17 +66,110 @@ initComponent: function() {
        		        		keywords[i] = keyword;
        					}
        		        	return keywords.toString();
-       		        }}
-       		    ],
+       		        }},
+       		        {text: 'Replies', dataIndex: 'replies', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+						return value + " ("+ record.get('views') + " views)";
+					}},
+       		        {xtype: 'actioncolumn',
+					menuDisabled: true,
+		            sortable: false,
+		            width:25,
+                     items: [    
+                         {
+                         icon   : './resources/icons/View.gif',
+                         tooltip: 'View Replies',
+                         handler: function(grid, rowIndex, colIndex, item, e, record) {
+                        	 var tab = grid.findParentByType('tabpanel');
+                        	 var replyStore = Ext.data.StoreManager.lookup('SPTConcernComments');
+                        	 console.log(replyStore);
+                        	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+                        	 replyStore.getProxy().url = replyStore.getProxy().url + record.get('id');
+                 			
+                 			 replyStore.load(function(records, operation, success) {
+                 				 console.log(records);
+                 			 });
+                 				
+                        	 tab.child('#replyView').tab.show();
+                        	 tab.setActiveTab('replyView');
+                        	 
+                        	 replyStore.getProxy().url = originalUrl;
+                         }}]
+       		    }],
        		    plugins: [{
        	            //ptype: 'dvp_rowexpander',
        	            ptype: 'rowexpander',
        	            //pluginId: 'xpander',
        	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
        		    }]
+       		},
+       		{
+       			title: 'Replies',
+       			xtype: 'grid',
+       			selType: 'cellmodel',
+       			itemId: 'replyView',
+       			hidden: true,
+       			store: Ext.data.StoreManager.lookup('SPTConcernComments'),
+       			autoHeight: true,
+       		    width: 350,
+       		    dockedItems: [{
+                 xtype: 'toolbar',
+                 items: [{
+                	 icon: './resources/icons/Create.gif',
+                     text: 'Post a Reply',
+                     scope: this,
+                     handler: this.onAddClick
+                 	}]
+       		    }],
+       		    columns: [
+       		        { text: 'Contributor', dataIndex: 'author'}, 
+       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
+       		        { text: 'Reply', dataIndex: 'content',  field: {type: 'textfield'}}
+       		    ],
+       		    plugins: [this.editing],
+       		    listeners: {
+       		    	edit: this.onEdit
+       		    }
        		}
-       		]
+       	]
 
  this.callParent(arguments);
+},
+
+onAddClick: function(){
+    var userStore = Ext.data.StoreManager.lookup('SPTUser');
+    var user = userStore.getAt(0).get('username');
+    var commentsStore = Ext.data.StoreManager.lookup('SPTConcernComments');
+    var concernid = commentsStore.getAt(0).get('concernId');
+   
+	var rec = new SPT.model.SPTConcernComments({concernId: concernid, author: user, createTime: new Date(), content: ''});
+    var edit = this.editing;
+   
+    //create a new row and allow 'content' field to be edited
+    edit.cancelEdit();
+    commentsStore.insert(0, rec);
+    edit.startEditByPosition({
+        row: 0,
+        column: 2
+    });
+},
+
+onEdit: function(editor, e){
+	e.record.commit();
+	
+	var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
+	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
+	
+	//call BCTAgent to save using commentsStore proxy, but have to change url
+	var originalUrl = replyStore.getProxy().url;
+  	var encodedReply = escape(e.value);
+	replyStore.getProxy().url = originalUrl + e.record.get('concernId') +'/' + encodedReply + '/' + workflowId ;
+	replyStore.load(function(records, operation, success) {
+		console.log('reply saved');
+	});
+	
+	replyStore.getProxy().url = originalUrl; 
 }
+
 });
+
+

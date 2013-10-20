@@ -47,6 +47,8 @@ Ext.application({
                 }
             ]
         });
+    	
+    	SPT.app = this;
     }
     
 });

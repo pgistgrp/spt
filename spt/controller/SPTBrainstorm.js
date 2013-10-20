@@ -1,9 +1,9 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns'],
+    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply'],
     
-    models: ['SPTKeyword', 'SPTConcern', 'SPTConcerns'],
+    models: ['SPTKeyword', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply'],
     
     views: ['bct.Brainstorm'],
         
@@ -205,5 +205,5 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	if (wfInfo == null){
     		this.getSelectWorkflowMsg();
     	}
-    }
+    },
 });

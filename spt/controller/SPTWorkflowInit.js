@@ -52,6 +52,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
         	
         	concernsStore.load(function(records, operation, success) {
         	    console.log('getconcerns');
+        	    console.log(records);
         	});
         	
         	concernsStore.getProxy().url = originalUrl;
