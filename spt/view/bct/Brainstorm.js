@@ -12,6 +12,8 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     
 
 initComponent: function() {
+	 var currentConcernId = "";
+	
 	 this.editing = Ext.create('Ext.grid.plugin.CellEditing');
 	 this.items = [
             {
@@ -81,14 +83,16 @@ initComponent: function() {
                          handler: function(grid, rowIndex, colIndex, item, e, record) {
                         	 var tab = grid.findParentByType('tabpanel');
                         	 var replyStore = Ext.data.StoreManager.lookup('SPTConcernComments');
-                        	 console.log(replyStore);
+            
                         	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
                         	 replyStore.getProxy().url = replyStore.getProxy().url + record.get('id');
                  			
                  			 replyStore.load(function(records, operation, success) {
                  				 console.log(records);
                  			 });
-                 				
+                 			 
+                 			 tab.currentConcernId = record.get('id');
+                        	 
                         	 tab.child('#replyView').tab.show();
                         	 tab.setActiveTab('replyView');
                         	 
@@ -127,7 +131,8 @@ initComponent: function() {
        		    ],
        		    plugins: [this.editing],
        		    listeners: {
-       		    	edit: this.onEdit
+       		    	edit: this.onEdit,
+       		    	beforeedit: this.checkOwner
        		    }
        		}
        	]
@@ -139,8 +144,8 @@ onAddClick: function(){
     var userStore = Ext.data.StoreManager.lookup('SPTUser');
     var user = userStore.getAt(0).get('username');
     var commentsStore = Ext.data.StoreManager.lookup('SPTConcernComments');
-    var concernid = commentsStore.getAt(0).get('concernId');
-   
+    var concernid =  this.currentConcernId;
+    
 	var rec = new SPT.model.SPTConcernComments({concernId: concernid, author: user, createTime: new Date(), content: ''});
     var edit = this.editing;
    
@@ -154,20 +159,46 @@ onAddClick: function(){
 },
 
 onEdit: function(editor, e){
-	e.record.commit();
+	if(e.originalValue == ''){
 	
-	var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
-	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
+		e.record.commit();
+		
+		var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
+		var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
+		
+		//call BCTAgent to save using commentsStore proxy, but have to change url
+		var originalUrl = replyStore.getProxy().url;
+	  	var encodedReply = escape(e.value);
+		replyStore.getProxy().url = originalUrl + e.record.get('concernId') +'/' + encodedReply + '/' + workflowId ;
+		replyStore.load(function(records, operation, success) {
+			console.log('reply saved');
+		});
+		
+		replyStore.getProxy().url = originalUrl; 
+		
+		//update replies & views in SPTConcern store for record, rather than reloading all again
+		var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		var currentConcernIndex = concernStore.find('id', e.record.get('concernId'));
+		
+		var currentConcern = concernStore.getAt(currentConcernIndex);
+		
+		var views = currentConcern.get('views') + 1;
+		currentConcern.set('views', views);
+		var replies = currentConcern.get('replies') + 1;
+		currentConcern.set('replies', replies);
+	}else{ //user is trying to edit an existing comment
+		//do nothing right now - need to check author before allowing edit
+	}
+},
+
+checkOwner: function(editor, e, eOpts){
+	var userStore = Ext.data.StoreManager.lookup('SPTUser');
+	var user = userStore.getAt(0).get('username');
 	
-	//call BCTAgent to save using commentsStore proxy, but have to change url
-	var originalUrl = replyStore.getProxy().url;
-  	var encodedReply = escape(e.value);
-	replyStore.getProxy().url = originalUrl + e.record.get('concernId') +'/' + encodedReply + '/' + workflowId ;
-	replyStore.load(function(records, operation, success) {
-		console.log('reply saved');
-	});
-	
-	replyStore.getProxy().url = originalUrl; 
+	if(e.record.get('author') == user){
+		return true;
+	}else
+		return false;
 }
 
 });
