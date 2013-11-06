@@ -1,9 +1,9 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply'],
+    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply', 'SPTDelete'],
     
-    models: ['SPTKeyword', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply'],
+    models: ['SPTKeyword', 'SPTConcern', 'SPTConcerns', 'SPTConcernComments', 'SPTConcernReply', 'SPTDelete'],
     
     views: ['bct.Brainstorm'],
         

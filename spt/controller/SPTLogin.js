@@ -11,7 +11,7 @@ Ext.define('SPT.controller.SPTLogin', {
     	//var token = CG.global.Env.token;
     	 
     	 var username = 'roderimj';
-    	 var token = 'cybergis_token_bk6SINZBMk22Dv6m';
+    	 var token = 'cybergis_token_FgH4hJkJ7IqYNn0S';
     		    
     	 var loginStore = this.getSPTUserStore();
     			

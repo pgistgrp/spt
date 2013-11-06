@@ -1,3 +1,7 @@
+//upgrade from 4.1.1a to 4.1.1 seems to require this, otherwise getting an error!
+Ext.Loader.setConfig({enabled:true});
+Ext.Loader.setPath('Ext.ux', './extjs/src/ux/');
+
 Ext.application({
     id: 'cg_pgist_app',
     name: 'SPT',
@@ -12,6 +16,7 @@ Ext.application({
     
     
     launch: function() {
+    	
     	var workflowStore = this.getStore('SPTWorkflows');
     	var initController = this.getController('SPTWorkflowInit');
     	workflowStore.on({

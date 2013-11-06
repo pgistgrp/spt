@@ -109,7 +109,11 @@ initComponent: function() {
        		{
        			title: 'Replies',
        			xtype: 'grid',
-       			selType: 'cellmodel',
+       			selModel: {
+       				selType: 'cellmodel',
+       			    mode: 'SINGLE',
+       			    allowDeselect: true
+       			},
        			itemId: 'replyView',
        			hidden: true,
        			store: Ext.data.StoreManager.lookup('SPTConcernComments'),
@@ -122,20 +126,34 @@ initComponent: function() {
                      text: 'Post a Reply',
                      scope: this,
                      handler: this.onAddClick
-                 	}]
+                 	},
+                 	{icon: './resources/icons/Cancel.gif',
+                 	 itemId: 'deleteButton',
+                     text: 'Delete Reply',
+                     scope: this,
+                     handler: this.onDeleteClick,
+                 	 disabled: true}
+                 	]
        		    }],
        		    columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Reply', dataIndex: 'content',  field: {type: 'textfield'}}
+       		        { text: 'Reply', dataIndex: 'content',  field: {type: 'textfield'}},
        		    ],
        		    plugins: [this.editing],
        		    listeners: {
        		    	edit: this.onEdit,
-       		    	beforeedit: this.checkOwner
-       		    }
-       		}
-       	]
+       		    	beforeedit: this.checkOwner,
+       		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
+       		    		this.down('#deleteButton').setDisabled(true);
+       		    		
+       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+       		    		var user = userStore.getAt(0).get('username');
+       		    		if(record.get('author') == user){
+       		    			this.down('#deleteButton').setDisabled(false);
+       		    		}
+       		    	}}
+       		  }];
 
  this.callParent(arguments);
 },
@@ -158,17 +176,36 @@ onAddClick: function(){
     });
 },
 
-onEdit: function(editor, e){
-	if(e.originalValue == ''){
+onDeleteClick: function(){
+	var grid = this.down('#replyView');
+	var record = grid.getSelectionModel().getSelection();
 	
-		e.record.commit();
-		
-		var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
-		var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
-		
+	console.log(record);
+	
+    var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
+    var commentsStore = Ext.data.StoreManager.lookup('SPTConcernComments');
+    
+	var originalUrl = deleteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+	deleteStore.getProxy().url = originalUrl + 'ConcernComment/' + record[0].data.id;
+	
+	deleteStore.load(function(records, operation, success) {
+		console.log('reply deleted');
+		commentsStore.remove(record[0]);
+	});
+	 
+	deleteStore.getProxy().url = originalUrl;
+},
+
+onEdit: function(editor, e){
+	e.record.commit();
+	var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
+	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
+	
+	var originalUrl = replyStore.getProxy().url;
+  	var encodedReply = escape(e.value);
+	
+	if(e.originalValue == ''){
 		//call BCTAgent to save using commentsStore proxy, but have to change url
-		var originalUrl = replyStore.getProxy().url;
-	  	var encodedReply = escape(e.value);
 		replyStore.getProxy().url = originalUrl + e.record.get('concernId') +'/' + encodedReply + '/' + workflowId ;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply saved');
@@ -186,8 +223,16 @@ onEdit: function(editor, e){
 		currentConcern.set('views', views);
 		var replies = currentConcern.get('replies') + 1;
 		currentConcern.set('replies', replies);
-	}else{ //user is trying to edit an existing comment
-		//do nothing right now - need to check author before allowing edit
+	}else if(e.originalValue == e.value){
+		//do nothing, user clicked in cell and left without changing
+	}
+	else{ //user is trying to edit an existing comment
+		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply + '/' + workflowId ;
+		replyStore.load(function(records, operation, success) {
+			console.log('reply updated');
+		});
+		
+		replyStore.getProxy().url = originalUrl; 
 	}
 },
 
