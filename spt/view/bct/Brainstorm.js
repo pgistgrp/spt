@@ -56,6 +56,17 @@ initComponent: function() {
        			autoHeight: true,
        		    width: 350,
        		    forceFit: true,
+       		    dockedItems: [{
+                    xtype: 'toolbar',
+                    items: [
+                    	{icon: './resources/icons/Cancel.gif',
+                    	itemId: 'deleteButton',
+                        text: 'Delete Feedback',
+                        scope: this,
+                        handler: this.onDeleteClick,
+                    	disabled: true}
+                    	]
+          		    }],
        		    columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
@@ -82,7 +93,7 @@ initComponent: function() {
                          tooltip: 'View Replies',
                          handler: function(grid, rowIndex, colIndex, item, e, record) {
                         	 var tab = grid.findParentByType('tabpanel');
-                        	 var replyStore = Ext.data.StoreManager.lookup('SPTConcernComments');
+                        	 var replyStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
             
                         	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
                         	 replyStore.getProxy().url = replyStore.getProxy().url + record.get('id');
@@ -104,7 +115,17 @@ initComponent: function() {
        	            ptype: 'rowexpander',
        	            //pluginId: 'xpander',
        	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
-       		    }]
+       		    }],
+       		    listeners: {
+    		    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
+    		    		this.down('#deleteButton').setDisabled(true);
+    		    		
+    		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+    		    		var user = userStore.getAt(0).get('username');
+    		    		if(record.get('author') == user){
+    		    			this.down('#deleteButton').setDisabled(false);
+    		    		}
+    		    	}}
        		},
        		{
        			title: 'Replies',
@@ -116,9 +137,10 @@ initComponent: function() {
        			},
        			itemId: 'replyView',
        			hidden: true,
-       			store: Ext.data.StoreManager.lookup('SPTConcernComments'),
+       			store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
        			autoHeight: true,
        		    width: 350,
+       		    forceFit: true,
        		    dockedItems: [{
                  xtype: 'toolbar',
                  items: [{
@@ -161,15 +183,15 @@ initComponent: function() {
 onAddClick: function(){
     var userStore = Ext.data.StoreManager.lookup('SPTUser');
     var user = userStore.getAt(0).get('username');
-    var commentsStore = Ext.data.StoreManager.lookup('SPTConcernComments');
+    var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
     var concernid =  this.currentConcernId;
     
-	var rec = new SPT.model.SPTConcernComments({concernId: concernid, author: user, createTime: new Date(), content: ''});
+	var rec = new SPT.model.SPTConcernReplies({concernId: concernid, author: user, createTime: new Date(), content: ''});
     var edit = this.editing;
    
     //create a new row and allow 'content' field to be edited
     edit.cancelEdit();
-    commentsStore.insert(0, rec);
+    repliesStore.insert(0, rec);
     edit.startEditByPosition({
         row: 0,
         column: 2
@@ -177,57 +199,60 @@ onAddClick: function(){
 },
 
 onDeleteClick: function(){
-	var grid = this.down('#replyView');
+	var grid = this.getActiveTab();
+	var view = grid.getItemId();
 	var record = grid.getSelectionModel().getSelection();
+	var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
 	
-	console.log(record);
-	
-    var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
-    var commentsStore = Ext.data.StoreManager.lookup('SPTConcernComments');
-    
+	var store; //multi-purpose store dependng on which view is active
 	var originalUrl = deleteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
-	deleteStore.getProxy().url = originalUrl + 'ConcernComment/' + record[0].data.id;
+	
+	//check to see which grid view is active
+	if (view =='replyView'){
+		store = Ext.data.StoreManager.lookup('SPTConcernReplies');
+		deleteStore.getProxy().url = originalUrl + 'ConcernComment/' + record[0].data.id;
+	}else{ //feedbackView
+		store = Ext.data.StoreManager.lookup('SPTConcerns');
+		deleteStore.getProxy().url = originalUrl + 'Concern/' + record[0].data.id;
+	}
 	
 	deleteStore.load(function(records, operation, success) {
 		console.log('reply deleted');
-		commentsStore.remove(record[0]);
+		store.remove(record[0]);
 	});
-	 
-	deleteStore.getProxy().url = originalUrl;
+	
+	deleteStore.getProxy().url = originalUrl; 
+	
+	if(view =='replyView'){ //cannot update totals i feedback view because entire concern is deleted
+		this.updateTotals(record[0].data.concernId, 'subtract');
+	}
 },
 
 onEdit: function(editor, e){
 	e.record.commit();
+	
 	var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
 	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
 	
 	var originalUrl = replyStore.getProxy().url;
+	var concernId = e.record.get('concernId');
   	var encodedReply = escape(e.value);
 	
-	if(e.originalValue == ''){
-		//call BCTAgent to save using commentsStore proxy, but have to change url
-		replyStore.getProxy().url = originalUrl + e.record.get('concernId') +'/' + encodedReply + '/' + workflowId ;
+	if(e.originalValue == ''){ //new reply
+		replyStore.getProxy().url = originalUrl + concernId +'/' + encodedReply + '/' + workflowId;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply saved');
 		});
 		
 		replyStore.getProxy().url = originalUrl; 
+		var tab = e.grid.findParentByType('tabpanel');
+		tab.updateTotals(concernId, 'add');
 		
-		//update replies & views in SPTConcern store for record, rather than reloading all again
-		var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
-		var currentConcernIndex = concernStore.find('id', e.record.get('concernId'));
-		
-		var currentConcern = concernStore.getAt(currentConcernIndex);
-		
-		var views = currentConcern.get('views') + 1;
-		currentConcern.set('views', views);
-		var replies = currentConcern.get('replies') + 1;
-		currentConcern.set('replies', replies);
 	}else if(e.originalValue == e.value){
 		//do nothing, user clicked in cell and left without changing
 	}
-	else{ //user is trying to edit an existing comment
-		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply + '/' + workflowId ;
+	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
+		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
@@ -244,6 +269,26 @@ checkOwner: function(editor, e, eOpts){
 		return true;
 	}else
 		return false;
+},
+
+updateTotals: function(concernId, operation){
+	//update replies & views in SPTConcern store for record, rather than reloading all again
+	var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var currentConcernIndex = concernStore.find('id', concernId);
+	var currentConcern = concernStore.getAt(currentConcernIndex);
+	
+	//views are incremented no matter what
+	var views = currentConcern.get('views') + 1;
+	currentConcern.set('views', views);
+	
+	if(operation == 'add'){
+		var replies = currentConcern.get('replies') + 1;
+		currentConcern.set('replies', replies);
+	}else{//subtract
+		var replies = currentConcern.get('replies') - 1;
+		currentConcern.set('replies', replies);
+	} 	
+	
 }
 
 });

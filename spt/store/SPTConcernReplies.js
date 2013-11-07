@@ -1,7 +1,7 @@
-Ext.define('SPT.store.SPTConcernComments', {
+Ext.define('SPT.store.SPTConcernReplies', {
     extend: 'Ext.data.Store',
-	storeId: 'concernCommentsStore',
-    model: 'SPT.model.SPTConcernComments',
+	storeId: 'concernRepliesStore',
+    model: 'SPT.model.SPTConcernReplies',
     pageSize: 100,
     proxy: {
         type: 'jsonp',
