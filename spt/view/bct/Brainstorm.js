@@ -40,7 +40,13 @@ initComponent: function() {
             		height:200,
     				width: 305,
             		grow: true,
-            		allowBlank: false}],
+            		allowBlank: false},
+            		{
+        		    xtype: 'hiddenfield',
+        		    name: 'concernId',
+        		    itemId:'concernId',
+        		    value: 'new'
+        		    }],
 				buttons: [{
             	text: 'Continue',
             	action: 'getkeywords',
@@ -59,9 +65,13 @@ initComponent: function() {
        		    dockedItems: [{
                     xtype: 'toolbar',
                     items: [
+						{icon: './resources/icons/Modify.gif',
+						itemId: 'editButton',
+						scope: this,
+						handler: this.onFeedbackEditClick,
+						disabled: true},
                     	{icon: './resources/icons/Cancel.gif',
                     	itemId: 'deleteButton',
-                        text: 'Delete Feedback',
                         scope: this,
                         handler: this.onDeleteClick,
                     	disabled: true}
@@ -118,11 +128,13 @@ initComponent: function() {
        		    }],
        		    listeners: {
     		    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
+    		    		this.down('#editButton').setDisabled(true);
     		    		this.down('#deleteButton').setDisabled(true);
     		    		
     		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
     		    		var user = userStore.getAt(0).get('username');
     		    		if(record.get('author') == user){
+    		    			this.down('#editButton').setDisabled(false);
     		    			this.down('#deleteButton').setDisabled(false);
     		    		}
     		    	}}
@@ -151,7 +163,7 @@ initComponent: function() {
                  	},
                  	{icon: './resources/icons/Cancel.gif',
                  	 itemId: 'deleteButton',
-                     text: 'Delete Reply',
+                     text: 'Delete',
                      scope: this,
                      handler: this.onDeleteClick,
                  	 disabled: true}
@@ -260,6 +272,42 @@ onEdit: function(editor, e){
 		replyStore.getProxy().url = originalUrl; 
 	}
 },
+
+onFeedbackEditClick: function(){
+	var grid = this.getActiveTab();
+	var tab = grid.findParentByType('tabpanel');
+	var record = grid.getSelectionModel().getSelection();
+	
+	var feedbackTextArea = tab.down('#feedbackTextArea');
+	feedbackTextArea.setRawValue(record[0].data.content);
+	
+	//include concernId to process edit in SPTBrainstorm controller
+	var concernId = tab.down('#concernId');
+	concernId.setRawValue(record[0].data.id);
+	
+	var checkboxconfigs = [];
+   	var tagsStore = record[0].tags();
+   	for ( var i = 0; i < tagsStore.getCount(); i++) {
+		var tag = tagsStore.getAt(i);
+   		var keyword = tag.get('keyword');
+   		checkboxconfigs.push({
+			name : keyword,
+			inputValue : keyword,
+			boxLabel : keyword,
+			xtype : 'checkbox',
+			checked: true
+		});
+	}
+	
+	SPT.app.getController('SPTBrainstorm').createKeywordGUI(checkboxconfigs);
+	
+	tab.down('#continueBtn').hidden = true;
+	
+	tab.child('#feedbackForm').tab.show();
+	tab.setActiveTab('feedbackForm');
+	
+},
+
 
 checkOwner: function(editor, e, eOpts){
 	var userStore = Ext.data.StoreManager.lookup('SPTUser');
