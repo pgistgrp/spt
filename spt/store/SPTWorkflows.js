@@ -10,7 +10,7 @@ Ext.define('SPT.store.SPTWorkflows', {
             type: 'json',
 			root: 'reply',
 			totalProperty: 'openRunningTotal',
-			sucessfulProperty: 'successful',
+			successfulProperty: 'successful',
 			messageProperty:'reason'
         }
     }

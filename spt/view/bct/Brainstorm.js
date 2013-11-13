@@ -4,7 +4,6 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     autoHeight: true,
     minHeight: 400,
     
-    //requires: ['Ext.form.Panel', 'Ext.grid.*', 'Ext.ux.grid.plugin.RowExpander'],
     requires: ['Ext.form.Panel', 
                'Ext.grid.*', 
                'Ext.ux.RowExpander', 
@@ -59,7 +58,7 @@ initComponent: function() {
        			selType: 'cellmodel',
        			itemId: 'feedbackView',
        			store: Ext.data.StoreManager.lookup('SPTConcerns'),
-       			autoHeight: true,
+       			height: 400, //need to define a height so that grid scrolls
        		    width: 350,
        		    forceFit: true,
        		    dockedItems: [{
@@ -68,13 +67,21 @@ initComponent: function() {
 						{icon: './resources/icons/Modify.gif',
 						itemId: 'editButton',
 						scope: this,
+						tooltip: 'Edit Feedback',
 						handler: this.onFeedbackEditClick,
 						disabled: true},
                     	{icon: './resources/icons/Cancel.gif',
                     	itemId: 'deleteButton',
                         scope: this,
+                        tooltip: 'Delete Feedback',
                         handler: this.onDeleteClick,
-                    	disabled: true}
+                    	disabled: true},
+                    	{icon: './resources/icons/View.gif',
+                    	itemId: 'replyButton',
+                        scope: this,
+                        tooltip: 'View Replies',
+                        handler: this.onReplyClick,
+                        disabled: true}
                     	]
           		    }],
        		    columns: [
@@ -92,42 +99,16 @@ initComponent: function() {
        		        }},
        		        {text: 'Replies', dataIndex: 'replies', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
 						return value + " ("+ record.get('views') + " views)";
-					}},
-       		        {xtype: 'actioncolumn',
-					menuDisabled: true,
-		            sortable: false,
-		            width:25,
-                     items: [    
-                         {
-                         icon   : './resources/icons/View.gif',
-                         tooltip: 'View Replies',
-                         handler: function(grid, rowIndex, colIndex, item, e, record) {
-                        	 var tab = grid.findParentByType('tabpanel');
-                        	 var replyStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
-            
-                        	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
-                        	 replyStore.getProxy().url = replyStore.getProxy().url + record.get('id');
-                 			
-                 			 replyStore.load(function(records, operation, success) {
-                 				 console.log(records);
-                 			 });
-                 			 
-                 			 tab.currentConcernId = record.get('id');
-                        	 
-                        	 tab.child('#replyView').tab.show();
-                        	 tab.setActiveTab('replyView');
-                        	 
-                        	 replyStore.getProxy().url = originalUrl;
-                         }}]
-       		    }],
+					}}
+       		    ],
        		    plugins: [{
-       	            //ptype: 'dvp_rowexpander',
        	            ptype: 'rowexpander',
-       	            //pluginId: 'xpander',
        	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
        		    }],
        		    listeners: {
     		    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
+    		    		this.down('#replyButton').setDisabled(false);
+    		    		//only enable other buttons if user is author
     		    		this.down('#editButton').setDisabled(true);
     		    		this.down('#deleteButton').setDisabled(true);
     		    		
@@ -150,20 +131,20 @@ initComponent: function() {
        			itemId: 'replyView',
        			hidden: true,
        			store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
-       			autoHeight: true,
+       			height: 400, //need to define a height so that grid scrolls
        		    width: 350,
        		    forceFit: true,
        		    dockedItems: [{
                  xtype: 'toolbar',
                  items: [{
                 	 icon: './resources/icons/Create.gif',
-                     text: 'Post a Reply',
+                	 tooltip: 'Post Reply',
                      scope: this,
                      handler: this.onAddClick
                  	},
                  	{icon: './resources/icons/Cancel.gif',
                  	 itemId: 'deleteButton',
-                     text: 'Delete',
+                 	 tooltip: 'Delete Reply',
                      scope: this,
                      handler: this.onDeleteClick,
                  	 disabled: true}
@@ -190,6 +171,28 @@ initComponent: function() {
        		  }];
 
  this.callParent(arguments);
+},
+
+onReplyClick: function() {
+	var grid = this.getActiveTab();
+	var record = grid.getSelectionModel().getSelection(); 
+	
+	var tab = grid.findParentByType('tabpanel');
+	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
+
+	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+	 replyStore.getProxy().url = replyStore.getProxy().url + record[0].data.id;
+	
+	 replyStore.load(function(records, operation, success) {
+		 console.log(records);
+	 });
+	 
+	 tab.currentConcernId =  record[0].data.id;
+	 
+	 tab.child('#replyView').tab.show();
+	 tab.setActiveTab('replyView');
+	 
+	 replyStore.getProxy().url = originalUrl;
 },
 
 onAddClick: function(){

@@ -12,7 +12,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
         ],
     
     init: function() {
-       //once specific workflow is selected & loaded, get associated concerns
+    	//once specific workflow is selected & loaded, get associated concerns
        this.getSPTWorkflowStore().addListener('load',this.getConcerns, this);
     	
        this.control({

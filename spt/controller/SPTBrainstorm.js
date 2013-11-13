@@ -50,67 +50,39 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 			var originalUrl = keywordStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 			keywordStore.getProxy().url = keywordStore.getProxy().url + feedbackText;
 			
-			keywordStore.load(function(records, operation, success) {
-				var checkboxconfigs = [];
-				for ( var i = 0; i < records.length; i++) {
-					for(var j = 0; j < records[i].data.tags.length; j++){
-						checkboxconfigs.push({
-							name : records[i].data.tags[j],
-							inputValue : records[i].data.tags[j],
-							boxLabel : records[i].data.tags[j],
-							xtype : 'checkbox'
-						});
-					}
-				}
+			keywordStore.load({
+	            callback: this.onKeywordLoad,           
+	            scope: this
+	        });
 				
-				button.hidden = true;
-        
-				var keywordGroup = Ext.create('Ext.form.CheckboxGroup',{
-					itemId : 'keywordGroup',
-					fieldLabel: 'Keywords/phrases',
-					columns: 1,
-					items : checkboxconfigs
-				});
-	
-				var manualTag = Ext.create('Ext.form.field.Text',{
-					itemId : 'manualTag'
-				});
-				
-				var addManualButton = Ext.create('Ext.Button',{
-					text : 'Add Keyphrase',
-					action: 'addkeyword',
-					itemId: 'manualBtn'
-				});
-		
-				feedbackForm.add(keywordGroup);
-				feedbackForm.add(manualTag);
-				feedbackForm.add(addManualButton);
-				
-				var submitButton = Ext.create('Ext.Button',{
-					text : 'Submit',
-					action: 'submit',
-					itemId: 'submitBtn'
-				});
-				var cancelButton = Ext.create('Ext.Button',{
-					text : 'Cancel',
-					action: 'cancel',
-					itemId: 'cancelBtn'
-				});
-				
-				feedbackForm.add(submitButton);
-				feedbackForm.add(cancelButton);
-				
-			});
+			button.hidden = true;
+		};
 			
-			keywordStore.getProxy().url = originalUrl; //reset url to remove parameter
-    	}
+		keywordStore.getProxy().url = originalUrl; //reset url to remove parameter
     },
+    
+    onKeywordLoad: function(records){
+    	var checkboxconfigs = [];
+    	for ( var i = 0; i < records.length; i++) {
+			for(var j = 0; j < records[i].data.tags.length; j++){
+				checkboxconfigs.push({
+					name : records[i].data.tags[j],
+					inputValue : records[i].data.tags[j],
+					boxLabel : records[i].data.tags[j],
+					xtype : 'checkbox'
+				});
+			}
+		}
+		
+		this.createKeywordGUI(checkboxconfigs, false);
+    },
+    
     
     addManualTag: function(button) {
     	var feedbackForm = this.getFeedbackForm();
     	var manualTag = feedbackForm.getComponent('manualTag').getValue();
     	if(manualTag != ""){
-    		newTag = this.getSPTKeywordModel().create({tags: manualTag, potentialtags: '', successful: true});
+    		newTag = this.getSPTKeywordsModel().create({tags: manualTag, potentialtags: '', successful: true});
     		this.getSPTKeywordsStore().add(newTag);
     		keywordGroup = feedbackForm.getComponent('keywordGroup');
         	keywordGroup.add({
@@ -123,6 +95,46 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	}
     	
     },
+    
+    createKeywordGUI: function(checkboxconfigs){
+    	var feedbackForm = this.getFeedbackForm();
+    	
+    	var keywordGroup = Ext.create('Ext.form.CheckboxGroup',{
+			itemId : 'keywordGroup',
+			fieldLabel: 'Keywords/phrases',
+			columns: 1,
+			items : checkboxconfigs
+		});
+
+		var manualTag = Ext.create('Ext.form.field.Text',{
+			itemId : 'manualTag'
+		});
+		
+		var addManualButton = Ext.create('Ext.Button',{
+			text : 'Add Keyphrase',
+			action: 'addkeyword',
+			itemId: 'manualBtn'
+		});
+
+		feedbackForm.add(keywordGroup);
+		feedbackForm.add(manualTag);
+		feedbackForm.add(addManualButton);
+		
+		var submitButton = Ext.create('Ext.Button',{
+			text : 'Submit',
+			action: 'submit',
+			itemId: 'submitBtn'
+		});
+		var cancelButton = Ext.create('Ext.Button',{
+			text : 'Cancel',
+			action: 'cancel',
+			itemId: 'cancelBtn'
+		});
+		
+		feedbackForm.add(submitButton);
+		feedbackForm.add(cancelButton);
+    },
+    
     
     getSelectWorkflowMsg: function(){
     	return Ext.Msg.show({
@@ -155,25 +167,35 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         	if (wfInfo == null){
         		this.getSelectWorkflowMsg();
         	}else{
-        	
-	        	var originalUrl = concernStore.getProxy().url;
-	        	
-	        	var encodedFeedback = escape(this.getFeedbackTextArea().getValue());
-	        	
-	        	concernStore.getProxy().url = concernStore.getProxy().url
-	        		+ encodedFeedback
-	        		+ '/'+ selectedTagsString 
-	        		+ '/'+ wfInfo.getWorkflowId()
-	        		+ '/'+ wfInfo.getContextId()
-	        		+ '/'+ wfInfo.getActivityId(); 
-	        	
-	        	concernStore.load(function(records, operation, success) {
-	        		console.log("saved");
-	        	});
-	        	
-	        	concernStore.getProxy().url = originalUrl;
+        		var originalUrl = concernStore.getProxy().url;
+        		var encodedFeedback = escape(this.getFeedbackTextArea().getValue());
+        		var concernId = feedbackForm.getComponent('concernId').getValue();
+        		
+        		//check to see if new feedback 
+        		if(concernId == 'new'){
+		        	concernStore.getProxy().url = concernStore.getProxy().url
+		        		+ encodedFeedback
+		        		+ '/'+ selectedTagsString 
+		        		+ '/'+ wfInfo.getWorkflowId()
+		        		+ '/'+ wfInfo.getContextId()
+		        		+ '/'+ wfInfo.getActivityId(); 
+		        	
+		        	concernStore.load(function(records, operation, success) {
+		        		console.log("concern saved");
+		        	});
+		        	
+		        	concernStore.getProxy().url = originalUrl;
+        		}else{//in edit mode
+        			concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcern/'
+        			+ concernId
+        			+ '/'+ encodedFeedback
+        			+ '/'+ selectedTagsString;
+        			
+        			concernStore.load(function(records, operation, success) {
+		        		console.log("concern edited");
+		        	});
+        		}
 	        	this.resetForm();
-	        	
 	        	this.getController('SPTWorkflowInit').getConcerns();
         	}	
         }
