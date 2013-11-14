@@ -1,3 +1,8 @@
+ Ext.define('SPT.model.SPTDelete', {
+    extend: 'Ext.data.Model',
+    fields:[]//fields are empty because BCTAgent.deleteConcern only return whether successful or not
+});
+
 Ext.define('SPT.store.SPTDelete', {
     extend: 'Ext.data.Store',
 	storeId: 'deleteStore',
@@ -8,7 +13,7 @@ Ext.define('SPT.store.SPTDelete', {
         reader: {
             type: 'json',
 			root: 'reply',
-			sucessfulProperty: 'successful',
+			successProperty: 'successful',
 			messageProperty:'reason'
         }
     }

@@ -9,7 +9,7 @@ Ext.define('SPT.store.SPTConcernReplies', {
         reader: {
             type: 'json',
 			root: 'reply',
-			sucessfulProperty: 'successful',
+			successProperty: 'successful',
 			messageProperty:'reason'
         }
     }

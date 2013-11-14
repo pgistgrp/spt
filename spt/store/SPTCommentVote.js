@@ -1,16 +1,16 @@
- Ext.define('SPT.model.SPTVote', {
+ Ext.define('SPT.model.SPTCommentVote', {
     extend: 'Ext.data.Model',
     fields:[]//fields are empty because BCTAgent.setVoting only return whether successful or not
 });
 
 
-Ext.define('SPT.store.SPTVote', {
+Ext.define('SPT.store.SPTCommentVote', {
     extend: 'Ext.data.Store',
-	storeId: 'voteStore',
-    model: 'SPT.model.SPTVote',
+	storeId: 'commentVoteStore',
+    model: 'SPT.model.SPTCommentVote',
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/BCTAgent/setVoting/',
+        url : 'http://localhost:8080/dwr/jsonp/BCTAgent/setConcernCommentVoting/',
         reader: {
             type: 'json',
 			root: 'reply',

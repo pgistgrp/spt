@@ -1,3 +1,8 @@
+ Ext.define('SPT.model.SPTConcern', {
+    extend: 'Ext.data.Model',
+    fields:[]//fields are empty because BCTAgent.saveConcern only return whether successful or not
+});
+
 Ext.define('SPT.store.SPTConcern', {
     extend: 'Ext.data.Store',
 	storeId: 'concernStore',
@@ -8,7 +13,7 @@ Ext.define('SPT.store.SPTConcern', {
         reader: {
             type: 'json',
 			root: 'reply',
-			sucessfulProperty: 'successful',
+			successProperty: 'successful',
 			messageProperty:'reason'
         }
     }

@@ -1,3 +1,8 @@
+ Ext.define('SPT.model.SPTConcernReply', {
+    extend: 'Ext.data.Model',
+    fields:[]
+});
+
 Ext.define('SPT.store.SPTConcernReply', {
     extend: 'Ext.data.Store',
 	storeId: 'concernReply',
@@ -8,7 +13,7 @@ Ext.define('SPT.store.SPTConcernReply', {
         reader: {
             type: 'json',
 			root: 'reply',
-			sucessfulProperty: 'successful',
+			successProperty: 'successful',
 			messageProperty:'reason'
         }
     }
