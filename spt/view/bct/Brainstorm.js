@@ -312,7 +312,7 @@ onAddClick: function(){
     var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
     var concernid =  this.currentConcernId;
     
-	var rec = new SPT.model.SPTConcernReplies({concernId: concernid, author: user, createTime: new Date(), content: ''});
+	var rec = new SPT.model.SPTConcernReplies({concernId: concernid, author: user, createTime: new Date(), content: '', numAgree: 1, numVote: 1, object: 'voted'});
     var edit = this.editing;
    
     //create a new row and allow 'content' field to be edited
