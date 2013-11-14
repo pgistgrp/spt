@@ -24,12 +24,11 @@ initComponent: function() {
         		itemId: 'feedbackForm',
         		frame: true,
         		autoHeight: true,
-    			width: 350,
+    			width: 400,
     			overflowY: 'auto',
         		bodyPadding: 5,
         		fieldDefaults: {
             	msgTarget: 'side',
-            	labelWidth: 110
         		},
         		items: [{
             		fieldLabel: 'Please provide your comments and select at least 2 keywords/phrases or add custom keywords/phrases below',
@@ -37,7 +36,7 @@ initComponent: function() {
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
             		height:200,
-    				width: 305,
+    				width: 375,
             		grow: true,
             		allowBlank: false},
             		{
@@ -59,7 +58,7 @@ initComponent: function() {
        			itemId: 'feedbackView',
        			store: Ext.data.StoreManager.lookup('SPTConcerns'),
        			height: 400, //need to define a height so that grid scrolls
-       		    width: 350,
+       		    width: 400,
        		    forceFit: true,
        		    dockedItems: [{
                     xtype: 'toolbar',
@@ -81,6 +80,19 @@ initComponent: function() {
                         scope: this,
                         tooltip: 'View Replies',
                         handler: this.onReplyClick,
+                        disabled: true},
+                        { xtype: 'tbfill' },
+                    	{icon: './resources/icons/GoodMark.gif',
+                    	itemId: 'agreeButton',
+                        scope: this,
+                        tooltip: 'Agree',
+                        handler: this.onAgreeClick,
+                        disabled: true},
+                        {icon: './resources/icons/BadMark.gif',
+                    	itemId: 'disagreeButton',
+                        scope: this,
+                        tooltip: 'Disagree',
+                        handler: this.onDisagreeClick,
                         disabled: true}
                     	]
           		    }],
@@ -99,7 +111,11 @@ initComponent: function() {
        		        }},
        		        {text: 'Replies', dataIndex: 'replies', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
 						return value + " ("+ record.get('views') + " views)";
-					}}
+					}},
+					{text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+						return value + " out of "+ record.get('numVote') + " agree";
+					}},
+					
        		    ],
        		    plugins: [{
        	            ptype: 'rowexpander',
@@ -108,7 +124,9 @@ initComponent: function() {
        		    listeners: {
     		    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
     		    		this.down('#replyButton').setDisabled(false);
-    		    		//only enable other buttons if user is author
+    		    		//only enable other buttons depending on author<->user relationship
+    		    		this.down('#agreeButton').setDisabled(true);
+    		    		this.down('#disagreeButton').setDisabled(true);
     		    		this.down('#editButton').setDisabled(true);
     		    		this.down('#deleteButton').setDisabled(true);
     		    		
@@ -117,6 +135,11 @@ initComponent: function() {
     		    		if(record.get('author') == user){
     		    			this.down('#editButton').setDisabled(false);
     		    			this.down('#deleteButton').setDisabled(false);
+    		    		}else{//only user != author can agree or disagree with feedback
+    		    			if(record.get('object')== null){//and they haven't voted yet
+    		    				this.down('#agreeButton').setDisabled(false);
+    		    				this.down('#disagreeButton').setDisabled(false);
+    		    			}
     		    		}
     		    	}}
        		},
@@ -132,7 +155,7 @@ initComponent: function() {
        			hidden: true,
        			store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
        			height: 400, //need to define a height so that grid scrolls
-       		    width: 350,
+       		    width: 400,
        		    forceFit: true,
        		    dockedItems: [{
                  xtype: 'toolbar',
@@ -172,6 +195,56 @@ initComponent: function() {
 
  this.callParent(arguments);
 },
+
+onAgreeClick: function() {
+	var grid = this.getActiveTab();
+	var record = grid.getSelectionModel().getSelection(); 
+	this.setVote(record[0].data.id, true);
+},
+
+onDisagreeClick: function(){
+	var grid = this.getActiveTab();
+	var record = grid.getSelectionModel().getSelection(); 
+	this.setVote(record[0].data.id, false);
+},
+
+setVote: function(concernId, vote){
+	//make sure user can't vote again before processing
+	this.down('#agreeButton').setDisabled(true);
+	this.down('#disagreeButton').setDisabled(true);
+	
+	var voteStore = Ext.data.StoreManager.lookup('SPTVote');
+
+	var originalUrl = voteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+	voteStore.getProxy().url = voteStore.getProxy().url + concernId
+	+ '/' + vote;
+	
+	voteStore.load(function(records, operation, success) {
+		console.log('voted');
+	});
+	 
+	voteStore.getProxy().url = originalUrl;
+	
+	//update vote totals in SPTConcern store for record, rather than reloading all again
+	var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var currentConcernIndex = concernStore.find('id', concernId);
+	var currentConcern = concernStore.getAt(currentConcernIndex);
+	
+	if(vote == true){
+		var numAgree = currentConcern.get('numAgree') + 1;
+		currentConcern.set('numAgree', numAgree);
+	}
+	
+	//always increment numVote 
+	var numVote = currentConcern.get('numVote') + 1;
+	currentConcern.set('numVote', numVote);
+	
+	//and make sure voting object is no longer null for user so they can't vote again
+	var object = 'voted';
+	currentConcern.set('object', object);
+	
+},
+
 
 onReplyClick: function() {
 	var grid = this.getActiveTab();
@@ -238,7 +311,7 @@ onDeleteClick: function(){
 	
 	deleteStore.getProxy().url = originalUrl; 
 	
-	if(view =='replyView'){ //cannot update totals i feedback view because entire concern is deleted
+	if(view =='replyView'){ //cannot update totals in feedback view because entire concern is deleted
 		this.updateTotals(record[0].data.concernId, 'subtract');
 	}
 },

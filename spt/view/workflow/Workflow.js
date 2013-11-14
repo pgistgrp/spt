@@ -13,7 +13,7 @@ initComponent: function() {
 	     border: false,
 	     frame: true,
 	     height:50,
-	     width:350,
+	     width:400,
 	     items: [{
 			xtype: 'combobox',
 			itemId:'workflowCombobox',
