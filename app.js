@@ -6,8 +6,8 @@ Ext.application({
     id: 'cg_pgist_app',
     name: 'SPT',
     appFolder: 'spt',
-    autoCreateViewport: false, 
-    
+    autoCreateViewport: false,
+
     controllers:[
     	'SPTLogin',
     	'SPTWorkflowInit',

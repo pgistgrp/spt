@@ -5,10 +5,15 @@
     <link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css">
     <script type="text/javascript" src="extjs/ext-all-debug.js"></script>
     <script type="text/javascript" src="app.js"></script>
-     
+<!-- 
+This style needs to be added to Gateway index.html, or to the Gateway CSS.
+This will make text in all grids wrap, needed for Reply grid in Brainstorm.js.
+If global behavior not desired, need to assign a cls to grid and then qualify style with cls name.
+ -->     
 <style type="text/css">
 .x-grid-cell-inner {white-space:normal;}
 </style>
+
 </head>
 <body>
 <!--This is an example of how to autoselect Workflow, SPT refers to app name defined in app.js 

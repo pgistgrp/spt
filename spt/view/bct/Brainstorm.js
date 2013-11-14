@@ -31,7 +31,7 @@ initComponent: function() {
             	msgTarget: 'side',
         		},
         		items: [{
-            		fieldLabel: 'Please provide your comments and select at least 2 keywords/phrases or add custom keywords/phrases below',
+            		fieldLabel: 'Please provide your comments and select at least 2 keywords or phrases',
             		name: 'feedbackTextArea',
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
@@ -107,7 +107,7 @@ initComponent: function() {
        		        		var keyword = tag.get('keyword');
        		        		keywords[i] = keyword;
        					}
-       		        	return keywords.toString();
+       		        	return keywords;
        		        }},
        		        {text: 'Replies', dataIndex: 'replies', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
 						return value + " ("+ record.get('views') + " views)";
@@ -170,13 +170,29 @@ initComponent: function() {
                  	 tooltip: 'Delete Reply',
                      scope: this,
                      handler: this.onDeleteClick,
-                 	 disabled: true}
+                 	 disabled: true},
+                     { xtype: 'tbfill' },
+                 	{icon: './resources/icons/GoodMark.gif',
+                     itemId: 'agreeButton',
+                     scope: this,
+                     tooltip: 'Agree',
+                     handler: this.onAgreeClick,
+                     disabled: true},
+                     {icon: './resources/icons/BadMark.gif',
+                 	 itemId: 'disagreeButton',
+                     scope: this,
+                     tooltip: 'Disagree',
+                     handler: this.onDisagreeClick,
+                     disabled: true}
                  	]
        		    }],
        		    columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Reply', dataIndex: 'content',  field: {type: 'textfield'}},
+       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}},
+       		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+						return value + " out of "+ record.get('numVote') + " agree";
+					}},
        		    ],
        		    plugins: [this.editing],
        		    listeners: {
@@ -184,12 +200,19 @@ initComponent: function() {
        		    	beforeedit: this.checkOwner,
        		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
        		    		this.down('#deleteButton').setDisabled(true);
+       		    		this.down('#agreeButton').setDisabled(true);
+    		    		this.down('#disagreeButton').setDisabled(true);
        		    		
        		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
        		    		var user = userStore.getAt(0).get('username');
        		    		if(record.get('author') == user){
        		    			this.down('#deleteButton').setDisabled(false);
-       		    		}
+       		    		}else{//only user != author can agree or disagree with comment
+    		    			if(record.get('object')== null){//and they haven't voted yet
+    		    				this.down('#agreeButton').setDisabled(false);
+    		    				this.down('#disagreeButton').setDisabled(false);
+    		    			}
+    		    		}
        		    	}}
        		  }];
 
@@ -198,50 +221,65 @@ initComponent: function() {
 
 onAgreeClick: function() {
 	var grid = this.getActiveTab();
+	var view = grid.getItemId();
 	var record = grid.getSelectionModel().getSelection(); 
-	this.setVote(record[0].data.id, true);
+	this.setVote(record[0].data.id, true, view);
 },
 
 onDisagreeClick: function(){
 	var grid = this.getActiveTab();
+	var view = grid.getItemId();
 	var record = grid.getSelectionModel().getSelection(); 
-	this.setVote(record[0].data.id, false);
+	this.setVote(record[0].data.id, false, view);
 },
 
-setVote: function(concernId, vote){
+setVote: function(id, vote, view){
 	//make sure user can't vote again before processing
 	this.down('#agreeButton').setDisabled(true);
 	this.down('#disagreeButton').setDisabled(true);
 	
-	var voteStore = Ext.data.StoreManager.lookup('SPTVote');
-
-	var originalUrl = voteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
-	voteStore.getProxy().url = voteStore.getProxy().url + concernId
+	var store; //multi-purpose store depending on which view is active
+	
+	//check to see which grid view is active
+	if (view =='replyView'){
+		var store = Ext.data.StoreManager.lookup('SPTCommentVote');
+	}else{ //feedbackView
+		var store = Ext.data.StoreManager.lookup('SPTVote');
+	}
+	
+	var originalUrl = store.getProxy().url; //workaround: temp variable for storing proxy url without param
+	store.getProxy().url = store.getProxy().url + id
 	+ '/' + vote;
 	
-	voteStore.load(function(records, operation, success) {
+	store.load(function(records, operation, success) {
 		console.log('voted');
 	});
 	 
-	voteStore.getProxy().url = originalUrl;
+	store.getProxy().url = originalUrl;
 	
-	//update vote totals in SPTConcern store for record, rather than reloading all again
-	var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
-	var currentConcernIndex = concernStore.find('id', concernId);
-	var currentConcern = concernStore.getAt(currentConcernIndex);
+	//update vote totals in SPTConcerns or SPT ConcernReplies store for record, rather than reloading all again
+	var store; 
+	if (view =='replyView'){
+		var store = Ext.data.StoreManager.lookup('SPTConcernReplies');
+	}else{ //feedbackView
+		var store = Ext.data.StoreManager.lookup('SPTConcerns');
+	}
+	
+	var recordIndex = store.find('id', id);
+	var currentRecord = store.getAt(recordIndex);
 	
 	if(vote == true){
-		var numAgree = currentConcern.get('numAgree') + 1;
-		currentConcern.set('numAgree', numAgree);
+		var numAgree = currentRecord.get('numAgree') + 1;
+		currentRecord.set('numAgree', numAgree);
 	}
 	
 	//always increment numVote 
-	var numVote = currentConcern.get('numVote') + 1;
-	currentConcern.set('numVote', numVote);
+	var numVote = currentRecord.get('numVote') + 1;
+	currentRecord.set('numVote', numVote);
 	
 	//and make sure voting object is no longer null for user so they can't vote again
 	var object = 'voted';
-	currentConcern.set('object', object);
+	currentRecord.set('object', object);
 	
 },
 

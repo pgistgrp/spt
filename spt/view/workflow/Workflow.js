@@ -19,7 +19,7 @@ initComponent: function() {
 			itemId:'workflowCombobox',
 			fieldLabel: 'Choose a discussion topic:',
 			labelWidth: 150,
-			width:340,
+			width:375,
 			displayField: 'name',
 			valueField: 'id',
 			store: 'SPTWorkflows',
