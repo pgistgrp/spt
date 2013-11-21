@@ -4,18 +4,27 @@ Ext.define('SPT.controller.SPTLogin', {
     stores: ['SPTUser'],
     
     models: ['SPTUser'],
+    
+    requires: ['Ext.util.Cookies'],
 
     init: function() {
     			
-    	//var username = CG.global.Env.authuser;
-    	//var token = CG.global.Env.token;
-    	 
-    	 var username = 'roderimj';
-    	 var token = 'cybergis_token_yjsv29VaPrz3MXlt';
-    		    
+    	 var username; 
+    	 var token = null;
     	 var loginStore = this.getSPTUserStore();
+    	 //Check to see if CSFUser
+    	 var cookie = Ext.util.Cookies.get('csfuser');
+    	 if (cookie != null){
+    		username = cookie;
+    	 	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'csf';
+    	 }else{
+    		//username = CG.global.Env.authuser;
+    	    //token = CG.global.Env.token;
+    		 username = 'roderimj';
+        	 token = 'cybergis_token_R5vJ9twxXlk2LaKW';
+        	 loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
+    	 }
     			
-    	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
     	loginStore.load(function(records, operation, success) {
     		var record = loginStore.getAt(0);
     		if(! record.get('successful')){
