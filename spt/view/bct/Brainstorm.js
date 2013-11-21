@@ -364,7 +364,7 @@ onEdit: function(editor, e){
 	var concernId = e.record.get('concernId');
   	var encodedReply = escape(e.value);
 	
-	if(e.originalValue == ''){ //new reply
+  	if(e.originalValue == '' && e.value.trim().length != 0){ //new reply
 		replyStore.getProxy().url = originalUrl + concernId +'/' + encodedReply + '/' + workflowId;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply saved');
