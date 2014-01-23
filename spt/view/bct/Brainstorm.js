@@ -113,6 +113,7 @@ initComponent: function() {
 						return value + " ("+ record.get('views') + " views)";
 					}},
 					{text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+						metaData.style = 'white-space: normal;'; // applied style for DIV element
 						return value + " out of "+ record.get('numVote') + " agree";
 					}},
 					
@@ -189,9 +190,13 @@ initComponent: function() {
        		    columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}},
+       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
+       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+       		      		return value;      
+       		        }},
        		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
-						return value + " out of "+ record.get('numVote') + " agree";
+       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+       		        	return value + " out of "+ record.get('numVote') + " agree";
 					}},
        		    ],
        		    plugins: [this.editing],
