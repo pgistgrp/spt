@@ -81,7 +81,23 @@ initComponent: function() {
                         tooltip: 'View Replies',
                         handler: this.onReplyClick,
                         disabled: true},
-                        { xtype: 'tbfill' },
+                        {xtype: 'tbspacer' },
+                        {xtype: 'textfield',
+                        itemId: 'filterTxt',
+                        emptyText: 'Enter keyword filter',
+                        selectOnFocus: true,
+                        enableKeyEvents: true,
+                        listeners:{
+                        	scope:this,
+                        	keyup:this.onFilterKeywords,
+                        }},
+                        {icon: './resources/icons/CancelFilter.gif',
+                        	itemId: 'removeFilterButton',
+                            scope: this,
+                            tooltip: 'Remove Filter',
+                            handler: this.onRemoveFilterClick,
+                            disabled: true},
+                        {xtype: 'tbfill' },
                     	{icon: './resources/icons/GoodMark.gif',
                     	itemId: 'agreeButton',
                         scope: this,
@@ -427,6 +443,36 @@ onFeedbackEditClick: function(){
 	
 },
 
+onFilterKeywords: function(field, e, eOpts){
+	
+	var grid = this.getActiveTab();
+	var tab = grid.findParentByType('tabpanel');
+	tab.down('#removeFilterButton').setDisabled(false);
+	var concernsStore = grid.getStore();
+	var filterTxt = field.value;
+	
+	if (e.getKey() == e.ENTER) {
+    	concernsStore.clearFilter(true);
+    	concernsStore.filter({filterFn: function(item){ 
+    		var tagsStore = item.tags();
+       		var index = tagsStore.find('keyword', filterTxt);
+    		return index != -1;}}); 
+    }else if(filterTxt == ""){
+    	concernsStore.clearFilter(false);
+    	tab.down('#removeFilterButton').setDisabled(true);
+    }
+},
+
+onRemoveFilterClick: function(){
+	var grid = this.getActiveTab();
+	var concernsStore = grid.getStore();
+	concernsStore.clearFilter(false);
+	
+	var tab = grid.findParentByType('tabpanel');
+	var filterTxtfield = tab.down('#filterTxt');
+	filterTxtfield.reset();
+	
+},
 
 checkOwner: function(editor, e, eOpts){
 	var userStore = Ext.data.StoreManager.lookup('SPTUser');
