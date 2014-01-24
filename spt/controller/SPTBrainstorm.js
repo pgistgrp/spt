@@ -158,9 +158,15 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         }else{
         	var concernStore = this.getSPTConcernStore();
         	
+        	//get keywords
         	var selectedTagsString = '';
         	for (i=0; i<selectedTags.length; i++){
         		selectedTagsString += selectedTags[i].getName()+ ',';  
+        	}
+        	//add filter to keywords if provided in request
+        	var filter = this.getQueryParameter('filter');
+        	if(filter != null){      
+        		selectedTagsString += filter;
         	}
         	
         	var wfInfo = this.getController('SPTWorkflowInit').getCurrentWorkflowInfo();
@@ -228,4 +234,21 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     		this.getSelectWorkflowMsg();
     	}
     },
+    
+    getQueryParameter: function(parameter){
+    	  var queryString = window.top.location.search.substring(1);
+    	  var parameterName = 'filter' + "=";
+    	  if ( queryString.length > 0 ) {
+    	    begin = queryString.indexOf ( parameterName );
+    	    if ( begin != -1 ) {
+    	      begin += parameterName.length;
+    	      end = queryString.indexOf ( "&" , begin );
+    	        if ( end == -1 ) {
+    	        	end = queryString.length
+    	        }
+    	      return unescape(queryString.substring(begin, end));
+    	     }
+    	  } else
+    		  return null;
+    }
 });

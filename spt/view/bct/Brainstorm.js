@@ -445,23 +445,13 @@ onFeedbackEditClick: function(){
 },
 
 getFilterFromRequest: function() {
-	  var queryString = window.top.location.search.substring(1);
-	  var parameterName = 'filter' + "=";
-	  if ( queryString.length > 0 ) {
-	    begin = queryString.indexOf ( parameterName );
-	    if ( begin != -1 ) {
-	      begin += parameterName.length;
-	      end = queryString.indexOf ( "&" , begin );
-	        if ( end == -1 ) {
-	        end = queryString.length
-	      }
-	      var filter = unescape(queryString.substring(begin, end));
-	      var grid = this.getActiveTab();
-	  	  var tab = grid.findParentByType('tabpanel');
-	  	  tab.down('#filterTxt').setValue(filter);
-	  	  this.doFilter(filter);
-	    }
-	  }
+	var filter = SPT.app.getController('SPTBrainstorm').getQueryParameter('filter');
+	if(filter != null){      
+		var grid = this.getActiveTab();
+	  	var tab = grid.findParentByType('tabpanel');
+	  	tab.down('#filterTxt').setValue(filter);
+	  	this.doFilter(filter);
+	}
 },
 
 filterKeywords: function(field, e, eOpts){
