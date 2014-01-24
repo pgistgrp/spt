@@ -89,7 +89,8 @@ initComponent: function() {
                         enableKeyEvents: true,
                         listeners:{
                         	scope:this,
-                        	keyup:this.onFilterKeywords,
+                        	keyup:this.filterKeywords,
+                        	beforerender:this.getFilterFromRequest
                         }},
                         {icon: './resources/icons/CancelFilter.gif',
                         	itemId: 'removeFilterButton',
@@ -443,24 +444,51 @@ onFeedbackEditClick: function(){
 	
 },
 
-onFilterKeywords: function(field, e, eOpts){
-	
+getFilterFromRequest: function() {
+	  var queryString = window.top.location.search.substring(1);
+	  var parameterName = 'filter' + "=";
+	  if ( queryString.length > 0 ) {
+	    begin = queryString.indexOf ( parameterName );
+	    if ( begin != -1 ) {
+	      begin += parameterName.length;
+	      end = queryString.indexOf ( "&" , begin );
+	        if ( end == -1 ) {
+	        end = queryString.length
+	      }
+	      var filter = unescape(queryString.substring(begin, end));
+	      var grid = this.getActiveTab();
+	  	  var tab = grid.findParentByType('tabpanel');
+	  	  tab.down('#filterTxt').setValue(filter);
+	  	  this.doFilter(filter);
+	    }
+	  }
+},
+
+filterKeywords: function(field, e, eOpts){
 	var grid = this.getActiveTab();
-	var tab = grid.findParentByType('tabpanel');
-	tab.down('#removeFilterButton').setDisabled(false);
 	var concernsStore = grid.getStore();
-	var filterTxt = field.value;
+	var tab = grid.findParentByType('tabpanel');
 	
+	var filter = field.value;
 	if (e.getKey() == e.ENTER) {
-    	concernsStore.clearFilter(true);
-    	concernsStore.filter({filterFn: function(item){ 
-    		var tagsStore = item.tags();
-       		var index = tagsStore.find('keyword', filterTxt);
-    		return index != -1;}}); 
-    }else if(filterTxt == ""){
+    	this.doFilter(filter);
+    }else if(filter == ""){
     	concernsStore.clearFilter(false);
     	tab.down('#removeFilterButton').setDisabled(true);
     }
+},
+
+doFilter: function(filter){
+	var grid = this.getActiveTab();
+	var tab = grid.findParentByType('tabpanel');
+	tab.down('#removeFilterButton').setDisabled(false);
+	
+	var concernsStore = grid.getStore();
+    concernsStore.clearFilter(true);
+    concernsStore.filter({filterFn: function(item){ 
+    	var tagsStore = item.tags();
+       	var index = tagsStore.find('keyword', filter);
+    	return index != -1;}}); 
 },
 
 onRemoveFilterClick: function(){

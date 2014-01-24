@@ -3,7 +3,7 @@ Ext.Loader.setConfig({enabled:true});
 Ext.Loader.setPath('Ext.ux', './extjs/src/ux/');
 
 Ext.application({
-    id: 'cg_pgist_app',
+	id: 'cg_pgist_app',
     name: 'SPT',
     appFolder: 'spt',
     autoCreateViewport: false,
@@ -52,8 +52,6 @@ Ext.application({
                 }
             ]
         });
-    	
-    	SPT.app = this;
     }
     
 });
