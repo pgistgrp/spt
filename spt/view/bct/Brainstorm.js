@@ -2,6 +2,7 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     extend: 'Ext.tab.Panel',
     alias: 'widget.brainstorm',
     autoHeight: true,
+    itemId: 'brainstormPanel',
     minHeight: 400,
     
     requires: ['Ext.form.Panel', 
@@ -11,9 +12,14 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     
 
 initComponent: function() {
-	 var currentConcernId = "";
-	
+	 var currentConcern = null;
+	 
 	 this.editing = Ext.create('Ext.grid.plugin.CellEditing');
+	 this.editing.clicksToEdit = 1;
+	 
+	 this.on({tabchange: this.onTabChange,
+		 	  scope: this});
+	 
 	 this.items = [
             {
                 title: 'Provide Feedback',
@@ -75,7 +81,7 @@ initComponent: function() {
                         tooltip: 'Delete Feedback',
                         handler: this.onDeleteClick,
                     	disabled: true},
-                    	{icon: './resources/icons/View.gif',
+                    	{icon: './resources/icons/Bubble.gif',
                     	itemId: 'replyButton',
                         scope: this,
                         tooltip: 'View Replies',
@@ -163,79 +169,89 @@ initComponent: function() {
        		},
        		{
        			title: 'Replies',
-       			xtype: 'grid',
-       			selModel: {
-       				selType: 'cellmodel',
-       			    mode: 'SINGLE',
-       			    allowDeselect: true
-       			},
+       			xtype: 'form',
        			itemId: 'replyView',
        			hidden: true,
-       			store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
-       			height: 400, //need to define a height so that grid scrolls
-       		    width: 400,
-       		    forceFit: true,
-       		    dockedItems: [{
-                 xtype: 'toolbar',
-                 items: [{
-                	 icon: './resources/icons/Create.gif',
-                	 tooltip: 'Post Reply',
-                     scope: this,
-                     handler: this.onAddClick
-                 	},
-                 	{icon: './resources/icons/Cancel.gif',
-                 	 itemId: 'deleteButton',
-                 	 tooltip: 'Delete Reply',
-                     scope: this,
-                     handler: this.onDeleteClick,
-                 	 disabled: true},
-                     { xtype: 'tbfill' },
-                 	{icon: './resources/icons/GoodMark.gif',
-                     itemId: 'agreeButton',
-                     scope: this,
-                     tooltip: 'Agree',
-                     handler: this.onAgreeClick,
-                     disabled: true},
-                     {icon: './resources/icons/BadMark.gif',
-                 	 itemId: 'disagreeButton',
-                     scope: this,
-                     tooltip: 'Disagree',
-                     handler: this.onDisagreeClick,
-                     disabled: true}
-                 	]
-       		    }],
-       		    columns: [
-       		        { text: 'Contributor', dataIndex: 'author'}, 
-       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
-       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
-       		      		return value;      
-       		        }},
-       		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
-       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
-       		        	return value + " out of "+ record.get('numVote') + " agree";
-					}},
-       		    ],
-       		    plugins: [this.editing],
-       		    listeners: {
-       		    	edit: this.onEdit,
-       		    	beforeedit: this.checkOwner,
-       		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
-       		    		this.down('#deleteButton').setDisabled(true);
-       		    		this.down('#agreeButton').setDisabled(true);
-    		    		this.down('#disagreeButton').setDisabled(true);
-       		    		
-       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
-       		    		var user = userStore.getAt(0).get('username');
-       		    		if(record.get('author') == user){
-       		    			this.down('#deleteButton').setDisabled(false);
-       		    		}else{//only user != author can agree or disagree with comment
-    		    			if(record.get('object')== null){//and they haven't voted yet
-    		    				this.down('#agreeButton').setDisabled(false);
-    		    				this.down('#disagreeButton').setDisabled(false);
-    		    			}
-    		    		}
-       		    	}}
+       			items: [{
+       				xtype:'label',
+       				itemId: 'feedbackReview',
+       				text: '',
+       				style: 'color: #15428b; font-size: 12px',
+       				width: 350,
+       				shrinkWrap: 2
+       				},    
+       				{xtype: 'grid',
+       				selModel: {
+       					selType: 'cellmodel',
+       					mode: 'SINGLE',
+       					allowDeselect: true
+       				},
+       				store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
+       				height: 400, //need to define a height so that grid scrolls
+       				width: 400,
+       				forceFit: true,
+       				dockedItems: [{
+       					xtype: 'toolbar',
+       					items: [{
+       					icon: './resources/icons/Create.gif',
+       					tooltip: 'Post Reply',
+       					scope: this,
+       					handler: this.onAddClick
+       					},
+       					{icon: './resources/icons/Cancel.gif',
+	                 	 itemId: 'deleteButton',
+	                 	 tooltip: 'Delete Reply',
+	                     scope: this,
+	                     handler: this.onDeleteClick,
+	                 	 disabled: true},
+	                     { xtype: 'tbfill' },
+	                 	{icon: './resources/icons/GoodMark.gif',
+	                     itemId: 'agreeButton',
+	                     scope: this,
+	                     tooltip: 'Agree',
+	                     handler: this.onAgreeClick,
+	                     disabled: true},
+	                     {icon: './resources/icons/BadMark.gif',
+	                 	 itemId: 'disagreeButton',
+	                     scope: this,
+	                     tooltip: 'Disagree',
+	                     handler: this.onDisagreeClick,
+	                     disabled: true}
+	                 	]
+       				}],
+       				columns: [
+	       		        { text: 'Contributor', dataIndex: 'author'}, 
+	       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
+	       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
+	       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+	       		      		return value;      
+	       		        }},
+	       		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+	       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+	       		        	return value + " out of "+ record.get('numVote') + " agree";
+						}},
+	       		    ],
+	       		    plugins: [this.editing],
+	       		    listeners: {
+	       		    	edit: this.onEdit,
+	       		    	beforeedit: this.checkOwner,
+	       		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
+	       		    		this.down('#deleteButton').setDisabled(true);
+	       		    		this.down('#agreeButton').setDisabled(true);
+	    		    		this.down('#disagreeButton').setDisabled(true);
+	       		    		
+	       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+	       		    		var user = userStore.getAt(0).get('username');
+	       		    		if(record.get('author') == user){
+	       		    			this.down('#deleteButton').setDisabled(false);
+	       		    		}else{//only user != author can agree or disagree with comment
+	    		    			if(record.get('object')== null){//and they haven't voted yet
+	    		    				this.down('#agreeButton').setDisabled(false);
+	    		    				this.down('#disagreeButton').setDisabled(false);
+	    		    			}
+	    		    		}
+	       		    	}}
+       			}]
        		  }];
 
  this.callParent(arguments);
@@ -256,50 +272,66 @@ onDisagreeClick: function(){
 },
 
 setVote: function(id, vote, view){
-	//make sure user can't vote again before processing
-	this.down('#agreeButton').setDisabled(true);
-	this.down('#disagreeButton').setDisabled(true);
+	//make sure user can't vote the same again before processing
+	if (vote == true)
+		this.down('#agreeButton').setDisabled(true);
+	else //vote = false
+		this.down('#disagreeButton').setDisabled(true);
 	
-	var store; //multi-purpose store depending on which view is active
+	var voteStore; //multi-purpose store depending on which view is active
 	
 	//check to see which grid view is active
 	if (view =='replyView'){
-		var store = Ext.data.StoreManager.lookup('SPTCommentVote');
+		voteStore = Ext.data.StoreManager.lookup('SPTCommentVote');
 	}else{ //feedbackView
-		var store = Ext.data.StoreManager.lookup('SPTVote');
+		voteStore = Ext.data.StoreManager.lookup('SPTVote');
 	}
 	
-	var originalUrl = store.getProxy().url; //workaround: temp variable for storing proxy url without param
-	store.getProxy().url = store.getProxy().url + id
+	var originalUrl = voteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+	voteStore.getProxy().url = voteStore.getProxy().url + id
 	+ '/' + vote;
 	
-	store.load(function(records, operation, success) {
+	voteStore.load(function(records, operation, success) {
 		console.log('voted');
 	});
 	 
-	store.getProxy().url = originalUrl;
+	voteStore.getProxy().url = originalUrl;
 	
 	//update vote totals in SPTConcerns or SPT ConcernReplies store for record, rather than reloading all again
 	var store; 
 	if (view =='replyView'){
-		var store = Ext.data.StoreManager.lookup('SPTConcernReplies');
+		store = Ext.data.StoreManager.lookup('SPTConcernReplies');
 	}else{ //feedbackView
-		var store = Ext.data.StoreManager.lookup('SPTConcerns');
+		store = Ext.data.StoreManager.lookup('SPTConcerns');
 	}
 	
 	var recordIndex = store.find('id', id);
 	var currentRecord = store.getAt(recordIndex);
+	var numAgree;
+	var numVoted;
 	
-	if(vote == true){
-		var numAgree = currentRecord.get('numAgree') + 1;
-		currentRecord.set('numAgree', numAgree);
+	//check to see if already voted, if not then..
+	if(currentRecord.get('object') == null){
+		if(vote == true){
+			numAgree = currentRecord.get('numAgree') + 1;
+			currentRecord.set('numAgree', numAgree);
+			numVote = currentRecord.get('numVote') + 1;
+			currentRecord.set('numVote', numVote);
+		} else{ //they disagreed, just increment numVote
+			numVote = currentRecord.get('numVote') + 1;
+			currentRecord.set('numVote', numVote);
+		}
+	}else{ //already voted, don't increment numVoted
+		if(vote == true){ //disagreed before, now agree
+			numAgree = currentRecord.get('numAgree') + 1;
+			currentRecord.set('numAgree', numAgree);
+		} else{ //agreed before, no disagree
+			numAgree = currentRecord.get('numAgree') - 1;
+			currentRecord.set('numAgree', numAgree);
+		}
 	}
 	
-	//always increment numVote 
-	var numVote = currentRecord.get('numVote') + 1;
-	currentRecord.set('numVote', numVote);
-	
-	//and make sure voting object is no longer null for user so they can't vote again
+	//and make sure voting object is no longer null for concern 
 	var object = 'voted';
 	currentRecord.set('object', object);
 	
@@ -320,19 +352,28 @@ onReplyClick: function() {
 		 console.log(records);
 	 });
 	 
-	 tab.currentConcernId =  record[0].data.id;
+	 tab.currentConcern =  record[0].data;
 	 
-	 tab.child('#replyView').tab.show();
+	 var replyView = tab.child('#replyView');
+	 replyView.getComponent('feedbackReview').setText('Feedback from ' + tab.currentConcern.author + ': ' + tab.currentConcern.content);
+	 replyView.tab.show();
 	 tab.setActiveTab('replyView');
 	 
 	 replyStore.getProxy().url = originalUrl;
 },
 
+onTabChange: function(tabPanel, newCard, oldCard, eOpts){
+	if(oldCard.itemId == 'replyView'){
+		tabPanel.child('#replyView').tab.hide();
+	}
+},
+
+
 onAddClick: function(){
     var userStore = Ext.data.StoreManager.lookup('SPTUser');
     var user = userStore.getAt(0).get('username');
     var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
-    var concernid =  this.currentConcernId;
+    var concernid =  this.currentConcern.id;
     
 	var rec = new SPT.model.SPTConcernReplies({concernId: concernid, author: user, createTime: new Date(), content: '', numAgree: 1, numVote: 1, object: 'voted'});
     var edit = this.editing;

@@ -77,6 +77,15 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     	    );
     	rec.set('selected', true);
     	
+    	//close replies tab if visible bc user must select new feedback when workflow changed
+    	var viewport = combobox.findParentByType('viewport');
+		var brainstormPanel = viewport.getComponent('brainstormPanel');
+		var activeTab = brainstormPanel.getActiveTab();
+		if (activeTab.getItemId() == 'replyView'){
+			brainstormPanel.down('#replyButton').setDisabled(true);
+			brainstormPanel.setActiveTab('feedbackForm');
+		}
+    	
     	//load entire workflow sequence for selected workflow
     	var activeWorkflowStore = this.getSPTWorkflowStore();
     	var originalUrl = activeWorkflowStore.getProxy().url; //workaround: temp variable for storing proxy url without param
