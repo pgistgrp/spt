@@ -69,19 +69,19 @@ initComponent: function() {
        		    dockedItems: [{
                     xtype: 'toolbar',
                     items: [
-						{icon: './resources/icons/Modify.gif',
+						{icon: 'SPTCyberGIS/resources/icons/Modify.gif',
 						itemId: 'editButton',
 						scope: this,
 						tooltip: 'Edit Feedback',
 						handler: this.onFeedbackEditClick,
 						disabled: true},
-                    	{icon: './resources/icons/Cancel.gif',
+                    	{icon: 'SPTCyberGIS/resources/icons/Cancel.gif',
                     	itemId: 'deleteButton',
                         scope: this,
                         tooltip: 'Delete Feedback',
                         handler: this.onDeleteClick,
                     	disabled: true},
-                    	{icon: './resources/icons/Bubble.gif',
+                    	{icon: 'SPTCyberGIS/resources/icons/Bubble.gif',
                     	itemId: 'replyButton',
                         scope: this,
                         tooltip: 'View Replies',
@@ -98,20 +98,20 @@ initComponent: function() {
                         	keyup:this.filterKeywords,
                         	beforerender:this.getFilterFromRequest
                         }},
-                        {icon: './resources/icons/CancelFilter.gif',
+                        {icon: 'SPTCyberGIS/resources/icons/CancelFilter.gif',
                         	itemId: 'removeFilterButton',
                             scope: this,
                             tooltip: 'Remove Filter',
                             handler: this.onRemoveFilterClick,
                             disabled: true},
                         {xtype: 'tbfill' },
-                    	{icon: './resources/icons/GoodMark.gif',
+                    	{icon: 'SPTCyberGIS/resources/icons/GoodMark.gif',
                     	itemId: 'agreeButton',
                         scope: this,
                         tooltip: 'Agree',
                         handler: this.onAgreeClick,
                         disabled: true},
-                        {icon: './resources/icons/BadMark.gif',
+                        {icon: 'SPTCyberGIS/resources/icons/BadMark.gif',
                     	itemId: 'disagreeButton',
                         scope: this,
                         tooltip: 'Disagree',
@@ -160,98 +160,105 @@ initComponent: function() {
     		    			this.down('#editButton').setDisabled(false);
     		    			this.down('#deleteButton').setDisabled(false);
     		    		}else{//only user != author can agree or disagree with feedback
-    		    			if(record.get('object')== null){//and they haven't voted yet
+    		    			var object = record.get('object');
+    		    			if(object == null){//and they haven't voted yet
     		    				this.down('#agreeButton').setDisabled(false);
     		    				this.down('#disagreeButton').setDisabled(false);
-    		    			}
+    		    			} 
+    		    			else if (object.voting) //agreed already, allow disagree
+    		    				this.down('#disagreeButton').setDisabled(false);
+    		    			else //disagreed already, allow agree
+    		    				this.down('#agreeButton').setDisabled(false);
     		    		}
     		    	}}
        		},
        		{
        			title: 'Replies',
-       			xtype: 'form',
-       			itemId: 'replyView',
+       			xtype: 'grid',
        			hidden: true,
-       			items: [{
-       				xtype:'label',
-       				itemId: 'feedbackReview',
-       				text: '',
-       				style: 'color: #15428b; font-size: 12px',
-       				width: 350,
-       				shrinkWrap: 2
-       				},    
-       				{xtype: 'grid',
-       				selModel: {
-       					selType: 'cellmodel',
-       					mode: 'SINGLE',
-       					allowDeselect: true
-       				},
-       				store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
-       				height: 400, //need to define a height so that grid scrolls
-       				width: 400,
-       				forceFit: true,
-       				dockedItems: [{
-       					xtype: 'toolbar',
-       					items: [{
-       					icon: './resources/icons/Create.gif',
-       					tooltip: 'Post Reply',
-       					scope: this,
-       					handler: this.onAddClick
-       					},
-       					{icon: './resources/icons/Cancel.gif',
-	                 	 itemId: 'deleteButton',
-	                 	 tooltip: 'Delete Reply',
-	                     scope: this,
-	                     handler: this.onDeleteClick,
-	                 	 disabled: true},
-	                     { xtype: 'tbfill' },
-	                 	{icon: './resources/icons/GoodMark.gif',
-	                     itemId: 'agreeButton',
-	                     scope: this,
-	                     tooltip: 'Agree',
-	                     handler: this.onAgreeClick,
-	                     disabled: true},
-	                     {icon: './resources/icons/BadMark.gif',
-	                 	 itemId: 'disagreeButton',
-	                     scope: this,
-	                     tooltip: 'Disagree',
-	                     handler: this.onDisagreeClick,
-	                     disabled: true}
-	                 	]
-       				}],
-       				columns: [
-	       		        { text: 'Contributor', dataIndex: 'author'}, 
-	       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-	       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
-	       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
-	       		      		return value;      
-	       		        }},
-	       		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
-	       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
-	       		        	return value + " out of "+ record.get('numVote') + " agree";
-						}},
-	       		    ],
-	       		    plugins: [this.editing],
-	       		    listeners: {
-	       		    	edit: this.onEdit,
-	       		    	beforeedit: this.checkOwner,
-	       		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
-	       		    		this.down('#deleteButton').setDisabled(true);
-	       		    		this.down('#agreeButton').setDisabled(true);
-	    		    		this.down('#disagreeButton').setDisabled(true);
-	       		    		
-	       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
-	       		    		var user = userStore.getAt(0).get('username');
-	       		    		if(record.get('author') == user){
-	       		    			this.down('#deleteButton').setDisabled(false);
-	       		    		}else{//only user != author can agree or disagree with comment
-	    		    			if(record.get('object')== null){//and they haven't voted yet
-	    		    				this.down('#agreeButton').setDisabled(false);
-	    		    				this.down('#disagreeButton').setDisabled(false);
-	    		    			}
-	    		    		}
-	       		    	}}
-       			}]
+       			itemId: 'replyView',
+   				selModel: {
+   					selType: 'cellmodel',
+   					mode: 'SINGLE',
+   					allowDeselect: true
+   				},
+   				store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
+   				height: 400, //need to define a height so that grid scrolls
+   				width: 400,
+   				forceFit: true,
+   				dockedItems: [
+   				    {xtype:'label',
+					itemId: 'feedbackReview',
+					text: '',
+					style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
+					width: 350,
+					shrinkWrap: 2
+					},              
+   					{xtype: 'toolbar',
+   					items: [{
+   					icon: 'SPTCyberGIS/resources/icons/Create.gif',
+   					tooltip: 'Post Reply',
+   					scope: this,
+   					handler: this.onAddClick
+   					},
+   					{icon: 'SPTCyberGIS/resources/icons/Cancel.gif',
+                 	 itemId: 'deleteButton',
+                 	 tooltip: 'Delete Reply',
+                     scope: this,
+                     handler: this.onDeleteClick,
+                 	 disabled: true},
+                     { xtype: 'tbfill' },
+                 	{icon: 'SPTCyberGIS/resources/icons/GoodMark.gif',
+                     itemId: 'agreeButton',
+                     scope: this,
+                     tooltip: 'Agree',
+                     handler: this.onAgreeClick,
+                     disabled: true},
+                     {icon: 'SPTCyberGIS/resources/icons/BadMark.gif',
+                 	 itemId: 'disagreeButton',
+                     scope: this,
+                     tooltip: 'Disagree',
+                     handler: this.onDisagreeClick,
+                     disabled: true}
+                 	]
+   				}],
+   				columns: [
+       		        { text: 'Contributor', dataIndex: 'author'}, 
+       		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
+       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
+       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+       		      		return value;      
+       		        }},
+       		        { text: 'Votes', dataIndex: 'numAgree', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+       		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
+       		        	return value + " out of "+ record.get('numVote') + " agree";
+					}},
+       		    ],
+       		    plugins: [this.editing],
+       		    listeners: {
+       		    	edit: this.onEdit,
+       		    	beforeedit: this.checkOwner,
+       		    	select: function(cellModel, record, rowIndex, colIndex, eOpts) {
+       		    		this.down('#deleteButton').setDisabled(true);
+       		    		this.down('#agreeButton').setDisabled(true);
+    		    		this.down('#disagreeButton').setDisabled(true);
+       		    		
+       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+       		    		var user = userStore.getAt(0).get('username');
+       		    		if(record.get('author') == user){
+       		    			this.down('#deleteButton').setDisabled(false);
+       		    		}else{//only user != author can agree or disagree with comment
+       		    			var object = record.get('object');
+    		    			if(object == null){//and they haven't voted yet
+    		    				this.down('#agreeButton').setDisabled(false);
+    		    				this.down('#disagreeButton').setDisabled(false);
+    		    			} 
+    		    			else if (object.voting) //agreed already, allow disagree
+    		    				this.down('#disagreeButton').setDisabled(false);
+    		    			else //disagreed already, allow agree
+    		    				this.down('#agreeButton').setDisabled(false);
+    		    		}
+       		    	}}
        		  }];
 
  this.callParent(arguments);
@@ -309,30 +316,33 @@ setVote: function(id, vote, view){
 	var currentRecord = store.getAt(recordIndex);
 	var numAgree;
 	var numVoted;
+	var object = currentRecord.get('object');
 	
 	//check to see if already voted, if not then..
-	if(currentRecord.get('object') == null){
+	if(object == null){
 		if(vote == true){
 			numAgree = currentRecord.get('numAgree') + 1;
 			currentRecord.set('numAgree', numAgree);
 			numVote = currentRecord.get('numVote') + 1;
 			currentRecord.set('numVote', numVote);
+			object.voting = true;
 		} else{ //they disagreed, just increment numVote
 			numVote = currentRecord.get('numVote') + 1;
 			currentRecord.set('numVote', numVote);
+			object.voting = false;
 		}
-	}else{ //already voted, don't increment numVoted
+	}else{ //already voted in this session, don't increment numVoted
 		if(vote == true){ //disagreed before, now agree
 			numAgree = currentRecord.get('numAgree') + 1;
 			currentRecord.set('numAgree', numAgree);
-		} else{ //agreed before, no disagree
+			object.voting = true;
+		} else{ //agreed before, now disagree
 			numAgree = currentRecord.get('numAgree') - 1;
 			currentRecord.set('numAgree', numAgree);
+			object.voting = false;
 		}
 	}
 	
-	//and make sure voting object is no longer null for concern 
-	var object = 'voted';
 	currentRecord.set('object', object);
 	
 },

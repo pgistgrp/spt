@@ -20,9 +20,9 @@ Ext.define('SPT.controller.SPTLogin', {
     	 }else{
     		username = CG.global.Env.authuser;
     	    token = CG.global.Env.token;
-    		// username = 'roderimj';
-        	// token = 'cybergis_token_uCMZOI5wsZJDpQbT';
-        	 loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
+    		//username = 'roderimj';
+        	//token = 'cybergis_token_akNIS9pYXjzrRXjF';
+        	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
     	 }
     			
     	loginStore.load(function(records, operation, success) {

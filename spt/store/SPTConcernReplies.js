@@ -5,7 +5,7 @@ Ext.define('SPT.store.SPTConcernReplies', {
     pageSize: 100,
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/BCTAgent/getConcernComments/',
+        url : 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/getConcernComments/',
         reader: {
             type: 'json',
 			root: 'reply',

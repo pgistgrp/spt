@@ -21,22 +21,22 @@ Ext.application({
     	var initController = this.getController('SPTWorkflowInit');
     	workflowStore.on({
 	    	//afterload is a custom event, store.load doesn't allow combobox.store to be set
-    		afterload: function(){initController.selectWorkflow('SPT Grid Test');}
+    		afterload: function(){initController.selectWorkflow('Viewshed Feedback');}
     	});
 
     	Ext.create('Ext.container.Viewport', {
-//    	Ext.create('Ext.window.Window', { //for CyberGIS
-//            id: 'cg_pgist_win',
-//            xtype: 'window',
-//            title: 'Participatory Panel',
-//            modal: true,
-//            closeAction: 'hide',
-//            y:100,
-//            autoScroll: true,
-//            autoHeight: true,
-//            maxHeight: 600,
-//            minHeight: 500,
-//            autoWidth: true,
+    	Ext.create('Ext.window.Window', { //for CyberGIS
+            id: 'cg_pgist_win',
+            xtype: 'window',
+            title: 'Participatory Panel',
+            modal: true,
+            closeAction: 'hide',
+            y:100,
+            autoScroll: true,
+            autoHeight: true,
+            maxHeight: 600,
+            minHeight: 500,
+            autoWidth: true,
             layout: 'vbox',
             items: [
                	{
@@ -52,6 +52,9 @@ Ext.application({
                 }
             ]
         });
+    	
+    	//need this to access Controllers from Views 
+    	SPT.app = this;
     }
     
 });
