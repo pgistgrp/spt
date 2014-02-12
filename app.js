@@ -25,19 +25,19 @@ Ext.application({
     	});
 
     	Ext.create('Ext.container.Viewport', {
-    	Ext.create('Ext.window.Window', { //for CyberGIS
-            id: 'cg_pgist_win',
-            xtype: 'window',
-            title: 'Participatory Panel',
-            modal: true,
-            closeAction: 'hide',
-            y:100,
-            autoScroll: true,
-            autoHeight: true,
-            maxHeight: 600,
-            minHeight: 500,
-            autoWidth: true,
-            layout: 'vbox',
+//    	Ext.create('Ext.window.Window', { //for CyberGIS
+//            id: 'cg_pgist_win',
+//            xtype: 'window',
+//            title: 'Participatory Panel',
+//            modal: true,
+//            closeAction: 'hide',
+//            y:100,
+//            autoScroll: true,
+//            autoHeight: true,
+//            maxHeight: 600,
+//            minHeight: 500,
+//            autoWidth: true,
+//            layout: 'vbox',
             items: [
                	{
                     region:'north',
