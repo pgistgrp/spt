@@ -236,7 +236,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     },
     
     getQueryParameter: function(parameter){
-    	  var queryString = window.top.location.search.substring(1);
+    	  var queryString = window.location.search.substring(1);
     	  var parameterName = 'filter' + "=";
     	  if ( queryString.length > 0 ) {
     	    begin = queryString.indexOf ( parameterName );
