@@ -451,7 +451,7 @@ onEdit: function(editor, e){
 		//do nothing, user clicked in cell and left without changing
 	}
 	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
-		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
+		replyStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
