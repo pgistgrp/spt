@@ -6,6 +6,7 @@ Ext.application({
 	id: 'cg_pgist_app',
     name: 'SPT',
     appFolder: 'spt',
+    appProperty: 'app',
     autoCreateViewport: false,
 
     controllers:[
@@ -54,7 +55,7 @@ Ext.application({
         });
     	
     	//need this to access Controllers from Views 
-    	SPT.app = this;
+    	SPT[this.appProperty] = this;
     }
     
 });
