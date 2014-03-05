@@ -7,7 +7,7 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
     
     requires: ['Ext.form.Panel', 
                'Ext.grid.*', 
-               'Ext.ux.RowExpander', 
+               'SPT.lib.AllRowExpander', 
                'Ext.form.field.Text',],
     
 
@@ -19,6 +19,22 @@ initComponent: function() {
 	 
 	 this.on({tabchange: this.onTabChange,
 		 	  scope: this});
+//	 
+//	 Ext.ux.RowExpander.addMembers({
+//		 isCollapsed: function(){
+//			 var view = this.view,
+//	            rowNodes = view.getNodes(),
+//	            collapsed = true;
+//			 //check status of each row, if any are already expanded then leave view as is, 
+//			 //if none are expanded - then SPTBrainstormController will expand all
+//			 for (i=0; i<rowNodes.length; i++){
+//				row = Ext.get(rowNodes[i]);	
+//				collapsed = row.hasCls(this.rowCollapsedCls);
+//				if(!collapsed) break;
+//			 }
+//	        return collapsed;
+//		 }});
+
 	 
 	 this.items = [
             {
@@ -66,6 +82,7 @@ initComponent: function() {
        			height: 400, //need to define a height so that grid scrolls
        		    width: 400,
        		    forceFit: true,
+       		    viewConfig:{itemId: 'feedbackGridView'},
        		    dockedItems: [{
                     xtype: 'toolbar',
                     items: [
@@ -142,7 +159,8 @@ initComponent: function() {
 					
        		    ],
        		    plugins: [{
-       	            ptype: 'rowexpander',
+       		    	ptype: 'allrowexpander',
+       	            pluginId: 'expander',
        	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
        		    }],
        		    listeners: {
@@ -164,11 +182,12 @@ initComponent: function() {
     		    			if(object == null){//and they haven't voted yet
     		    				this.down('#agreeButton').setDisabled(false);
     		    				this.down('#disagreeButton').setDisabled(false);
-    		    			} 
-    		    			else if (object.voting) //agreed already, allow disagree
-    		    				this.down('#disagreeButton').setDisabled(false);
-    		    			else //disagreed already, allow agree
-    		    				this.down('#agreeButton').setDisabled(false);
+    		    			}else{
+    		    				if (object.voting) //agreed already, allow disagree
+    		    					this.down('#disagreeButton').setDisabled(false);
+    		    				else //disagreed already, allow agree
+    		    					this.down('#agreeButton').setDisabled(false);
+    		    			}
     		    		}
     		    	}}
        		},
@@ -253,10 +272,12 @@ initComponent: function() {
     		    				this.down('#agreeButton').setDisabled(false);
     		    				this.down('#disagreeButton').setDisabled(false);
     		    			} 
-    		    			else if (object.voting) //agreed already, allow disagree
-    		    				this.down('#disagreeButton').setDisabled(false);
-    		    			else //disagreed already, allow agree
-    		    				this.down('#agreeButton').setDisabled(false);
+    		    			else{
+    		    				if (object.voting) //agreed already, allow disagree
+    		    					this.down('#disagreeButton').setDisabled(false);
+        		    			else //disagreed already, allow agree
+        		    				this.down('#agreeButton').setDisabled(false);
+    		    			}
     		    		}
        		    	}}
        		  }];
@@ -320,6 +341,7 @@ setVote: function(id, vote, view){
 	
 	//check to see if already voted, if not then..
 	if(object == null){
+		object = new Object();
 		if(vote == true){
 			numAgree = currentRecord.get('numAgree') + 1;
 			currentRecord.set('numAgree', numAgree);

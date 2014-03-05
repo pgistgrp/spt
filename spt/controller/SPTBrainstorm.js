@@ -9,7 +9,9 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         
     refs: [
            {ref: 'feedbackForm', selector: 'brainstorm #feedbackForm'},
-           {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'}
+           {ref: 'feedbackTextArea', selector: 'brainstorm #feedbackTextArea'},
+           {ref: 'feedbackGrid', selector: 'brainstorm #feedbackView'},
+           {ref: 'brainstormPanel', selector: 'brainstorm'}
         ],
 
     init: function() {
@@ -31,10 +33,14 @@ Ext.define('SPT.controller.SPTBrainstorm', {
                 click: this.cancelConcern
             },
             
-            'brainstorm grid': {
+            'brainstorm #feedbackView': {
                 beforeactivate: this.showConcerns
-            }
+            },
             
+//           'brainstorm #feedbackGridView': {
+//        	   refresh: this.expandRecords
+//           }
+//            
         });
     },
     
@@ -250,5 +256,20 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	     }
     	  } else
     		  return null;
+    },
+    
+    expandRecords: function() {
+    	var grid = this.getFeedbackGrid();
+    	console.log(grid);
+    	
+    	var expander = grid.getPlugin('expander');
+    	if(expander.isCollapsed()){
+    		var store = grid.getStore();
+    	
+    		for(i=0; i < store.getCount(); i++){
+    			expander.toggleRow(i);
+    		}
+    	}
+    		
     }
 });
