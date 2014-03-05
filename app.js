@@ -22,7 +22,7 @@ Ext.application({
     	var initController = this.getController('SPTWorkflowInit');
     	workflowStore.on({
 	    	//afterload is a custom event, store.load doesn't allow combobox.store to be set
-    		afterload: function(){initController.selectWorkflow('Viewshed Feedback');}
+    		afterload: function(){initController.selectWorkflow('CSF Scenario Discussion');}
     	});
 
     	Ext.create('Ext.container.Viewport', {
