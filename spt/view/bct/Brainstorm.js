@@ -19,22 +19,6 @@ initComponent: function() {
 	 
 	 this.on({tabchange: this.onTabChange,
 		 	  scope: this});
-//	 
-//	 Ext.ux.RowExpander.addMembers({
-//		 isCollapsed: function(){
-//			 var view = this.view,
-//	            rowNodes = view.getNodes(),
-//	            collapsed = true;
-//			 //check status of each row, if any are already expanded then leave view as is, 
-//			 //if none are expanded - then SPTBrainstormController will expand all
-//			 for (i=0; i<rowNodes.length; i++){
-//				row = Ext.get(rowNodes[i]);	
-//				collapsed = row.hasCls(this.rowCollapsedCls);
-//				if(!collapsed) break;
-//			 }
-//	        return collapsed;
-//		 }});
-
 	 
 	 this.items = [
             {

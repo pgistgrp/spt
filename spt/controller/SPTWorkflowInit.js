@@ -77,8 +77,7 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     	rec.set('selected', true);
     	
     	//close replies tab if visible bc user must select new feedback when workflow changed
-    	var viewport = combobox.findParentByType('viewport');
-		var brainstormPanel = viewport.getComponent('brainstormPanel');
+    	var brainstormPanel = this.getController('SPTBrainstorm').getBrainstormPanel();
 		var activeTab = brainstormPanel.getActiveTab();
 		if (activeTab.getItemId() == 'replyView'){
 			brainstormPanel.down('#replyButton').setDisabled(true);
