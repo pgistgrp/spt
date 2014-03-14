@@ -20,6 +20,14 @@ initComponent: function() {
 	 this.on({tabchange: this.onTabChange,
 		 	  scope: this});
 	 
+	 //this approach used to prevent having to add rowExpander.css to index.html of app
+	 Ext.util.CSS.createStyleSheet(".rowexpand-header .rowexpand-expand-all "
+	+ "{ background-image: url(./resources/icons/row-expand-sprite.gif);"
+	+ "background-position: 0 0; background-repeat: no-repeat; margin-left: 1px; padding-right: 6px;}"
+	+ ".rowexpand-header .rowexpand-collapse-all {"
+	+ "background-image: url(./resources/icons/row-expand-sprite.gif);"
+	+ "background-position: -25px 0; background-repeat: no-repeat; margin-left: 1px; padding-right: 6px;}", 'rowExpander.css' );
+	 
 	 this.items = [
             {
                 title: 'Provide Feedback',
