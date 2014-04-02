@@ -38,7 +38,7 @@ Ext.application({
 //            maxHeight: 600,
 //            minHeight: 500,
 //            autoWidth: true,
-//            layout: 'vbox',
+            layout: 'vbox',
             items: [
                	{
                     region:'north',
