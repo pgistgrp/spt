@@ -1,7 +1,7 @@
 Ext.define('SPT.controller.SPTBrainstorm', {
     extend: 'Ext.app.Controller',
     
-    stores: ['SPTKeywords', 'SPTConcern', 'SPTConcerns', 'SPTConcernReplies', 'SPTConcernReply', 'SPTDelete', 'SPTVote', 'SPTCommentVote'],
+    stores: ['SPTKeywords', 'SPTKeywordSummary', 'SPTConcern', 'SPTConcerns', 'SPTConcernReplies', 'SPTConcernReply', 'SPTDelete', 'SPTVote', 'SPTCommentVote'],
     
     models: ['SPTKeywords', 'SPTConcerns', 'SPTConcernReplies'],
     
@@ -251,4 +251,6 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	  } else
     		  return null;
     }
+    	  	
+    	  	
 });
