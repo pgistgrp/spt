@@ -45,6 +45,7 @@ initComponent: function() {
         		},
         		items: [{
             		fieldLabel: 'Please provide your comments and select at least 2 keywords or phrases',
+            		labelStyle: 'color: #15428b; font-size: 11px; font-weight:bold;',
             		name: 'feedbackTextArea',
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
@@ -275,31 +276,35 @@ initComponent: function() {
       		  
        		{title: 'Assess Summary',
        		xtype: 'form',
-            padding: '5 5 0 5',
+            padding: '5 0 0 5',
             border: false,
             collapsible: true,
             itemId: 'keywordSummaryForm',
         	frame: true,
         	autoHeight: true,
-    		width: 400,
-            layout: 'column',  
+    		width: 500,
+    		layout: {
+    	        type: 'table',
+    	        columns: 2
+    	    },
             items: [
-//                {xtype:'label',
-//                itemId: 'instructions',
-//                text: 'Explore participants\' keywords and keyphrases, and vote on moving to synthesis phase if all topics have been covered.',
-//                style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
-//                },
+                {xtype:'label',
+                colspan: 2,	
+                itemId: 'instructions',
+                text: 'Review participants\' keywords and keyphrases, and vote to move to synthesis phase if topics have been sufficiently covered.',
+                style: 'color: #15428b; font-size: 11px; font-weight:bold;'
+                },
        			{xtype: 'grid',
                 selType: 'cellmodel',
                 itemId: 'keywordSummaryGrid',
-                columnWidth: 0.50,
                 store: Ext.data.StoreManager.lookup('SPTKeywordSummary'),
                 height: 400, //need to define a height so that grid scrolls
-                width: 400,
+                width:150,
            		forceFit: true,
            		columns: [
-            		{header: 'Keywords/Keyphrases', dataIndex: 'keyword'},
-            		{header: 'Times', dataIndex: 'times'},
+            		{header: 'Keywords/Keyphrases', dataIndex: 'keyword', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+       		        	return record.get('keyword') + ' (' + record.get('times') + ')';
+					}}
             	],
          		listeners:{
          			beforerender: this.loadSummaryStore
@@ -307,9 +312,9 @@ initComponent: function() {
        		  	{xtype: 'grid',
                 selType: 'cellmodel',
                 itemId: 'concernSummaryGrid',
-                columnWidth: 0.50,
                 store: Ext.data.StoreManager.lookup('SPTConcerns'),
                 height: 400, //need to define a height so that grid scrolls
+                width: 350,
        		    forceFit: true,
        		    viewConfig:{itemId: 'concernSummaryGridView'},
        		    dockedItems: [
@@ -370,7 +375,12 @@ initComponent: function() {
        	    		//only enable other buttons depending on author<->user relationship
        	    		this.down('#agreeButton').setDisabled(true);
        	    		this.down('#disagreeButton').setDisabled(true);
-       	    	}}
+       	    	}},
+       	    	plugins: [{
+    		    	ptype: 'allrowexpander',
+    	            pluginId: 'expander',
+    	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
+    		    }]
              }]},
      ]
 
