@@ -112,7 +112,7 @@ initComponent: function() {
                             scope: this,
                             tooltip: 'Remove Filter',
                             handler: this.onRemoveFilterClick,
-                            disabled: true},
+                        },
                         {xtype: 'tbfill' },
                     	{icon: './resources/icons/GoodMark.gif',
                     	itemId: 'agreeButton',
@@ -307,7 +307,14 @@ initComponent: function() {
 					}}
             	],
          		listeners:{
-         			beforerender: this.loadSummaryStore
+         			beforerender: this.loadSummaryStore,
+         			select: function(rowModel, record, rowIndex, colIndex, eOpts) {
+         				var filter = record.get('keyword');
+         				var tab = this.findParentByType('tabpanel');
+         				var form = tab.getActiveTab();
+         				form.down('#filterTxt').setValue(filter);
+         				tab.doFilter(filter);
+         			}
          		}},
        		  	{xtype: 'grid',
                 selType: 'cellmodel',
@@ -335,7 +342,7 @@ initComponent: function() {
        	                scope: this,
        	                tooltip: 'Remove Filter',
        	                handler: this.onRemoveFilterClick,
-       	                disabled: true},
+       	            },
        	            {xtype:'label',
            	            itemId: 'instructions',
            				text: 'Move forward?',
@@ -500,6 +507,16 @@ onReplyClick: function() {
 onTabChange: function(tabPanel, newCard, oldCard, eOpts){
 	if(oldCard.itemId == 'replyView'){
 		tabPanel.child('#replyView').tab.hide();
+	} else if (oldCard.itemId == 'keywordSummaryForm' && newCard.itemId == 'feedbackView'){
+		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		concernsStore.clearFilter(false);
+		tabPanel.down('#filterTxt').reset();
+	} else if (oldCard.itemId == 'feedbackView' && newCard.itemId == 'keywordSummaryForm'){
+		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		concernsStore.clearFilter(false);
+		console.log(tabPanel);
+		var form = tabPanel.getActiveTab();
+		form.down('#filterTxt').reset();
 	}
 },
 
@@ -631,25 +648,19 @@ getFilterFromRequest: function() {
 },
 
 filterKeywords: function(field, e, eOpts){
-	var grid = this.getActiveTab();
-	var concernsStore = grid.getStore();
-	var tab = grid.findParentByType('tabpanel');
+	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
 	
 	var filter = field.value;
 	if (e.getKey() == e.ENTER) {
     	this.doFilter(filter);
     }else if(filter == ""){
     	concernsStore.clearFilter(false);
-    	tab.down('#removeFilterButton').setDisabled(true);
     }
 },
 
 doFilter: function(filter){
-	var grid = this.getActiveTab();
-	var tab = grid.findParentByType('tabpanel');
-	tab.down('#removeFilterButton').setDisabled(false);
 	
-	var concernsStore = grid.getStore();
+	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
     concernsStore.clearFilter(true);
     concernsStore.filter({filterFn: function(item){ 
     	var tagsStore = item.tags();
@@ -659,11 +670,11 @@ doFilter: function(filter){
 
 onRemoveFilterClick: function(){
 	var grid = this.getActiveTab();
-	var concernsStore = grid.getStore();
+	
+	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
 	concernsStore.clearFilter(false);
 	
-	var tab = grid.findParentByType('tabpanel');
-	var filterTxtfield = tab.down('#filterTxt');
+	var filterTxtfield = grid.down('#filterTxt');
 	filterTxtfield.reset();
 	
 },
@@ -702,6 +713,7 @@ loadSummaryStore: function(){
 		
 		summaryStore = Ext.data.StoreManager.lookup('SPTKeywordSummary');
 		concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		concernsStore.clearFilter(false);
 	  	concernsStore.each(function(item){ 
 	  		var tagsStore = item.tags();
 	  		tagsStore.each(function(item){
@@ -710,8 +722,6 @@ loadSummaryStore: function(){
 	  			}
 	  		});
 	  	});
-	  	
-	  	console.log(summaryStore);
 }
 
 });
