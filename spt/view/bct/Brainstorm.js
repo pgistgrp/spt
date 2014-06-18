@@ -13,7 +13,6 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
 
 initComponent: function() {
 	 var currentConcern = null;
-	 
 	 this.editing = Ext.create('Ext.grid.plugin.CellEditing');
 	 this.editing.clicksToEdit = 1;
 	 
@@ -272,10 +271,112 @@ initComponent: function() {
     		    			}
     		    		}
        		    	}}
-       		  }];
+       		  },
+      		  
+       		{title: 'Assess Summary',
+       		xtype: 'form',
+            padding: '5 5 0 5',
+            border: false,
+            collapsible: true,
+            itemId: 'keywordSummaryForm',
+        	frame: true,
+        	autoHeight: true,
+    		width: 400,
+            layout: 'column',  
+            items: [
+//                {xtype:'label',
+//                itemId: 'instructions',
+//                text: 'Explore participants\' keywords and keyphrases, and vote on moving to synthesis phase if all topics have been covered.',
+//                style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
+//                },
+       			{xtype: 'grid',
+                selType: 'cellmodel',
+                itemId: 'keywordSummaryGrid',
+                columnWidth: 0.50,
+                store: Ext.data.StoreManager.lookup('SPTKeywordSummary'),
+                height: 400, //need to define a height so that grid scrolls
+                width: 400,
+           		forceFit: true,
+           		columns: [
+            		{header: 'Keywords/Keyphrases', dataIndex: 'keyword'},
+            		{header: 'Times', dataIndex: 'times'},
+            	],
+         		listeners:{
+         			beforerender: this.loadSummaryStore
+         		}},
+       		  	{xtype: 'grid',
+                selType: 'cellmodel',
+                itemId: 'concernSummaryGrid',
+                columnWidth: 0.50,
+                store: Ext.data.StoreManager.lookup('SPTConcerns'),
+                height: 400, //need to define a height so that grid scrolls
+       		    forceFit: true,
+       		    viewConfig:{itemId: 'concernSummaryGridView'},
+       		    dockedItems: [
+       	        {xtype: 'toolbar',
+       	        items: [
+       	            {xtype: 'textfield',
+       	            itemId: 'filterTxt',
+       	            emptyText: 'Enter keyword filter',
+       	            selectOnFocus: true,
+       	            enableKeyEvents: true,
+       	            listeners:{
+       	            	scope:this,
+       	            	keyup:this.filterKeywords,
+       	            	beforerender:this.getFilterFromRequest
+       	            }},
+       	            {icon: './resources/icons/CancelFilter.gif',
+       	            	itemId: 'removeFilterButton',
+       	                scope: this,
+       	                tooltip: 'Remove Filter',
+       	                handler: this.onRemoveFilterClick,
+       	                disabled: true},
+       	            {xtype:'label',
+           	            itemId: 'instructions',
+           				text: 'Move forward?',
+           				style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
+          
+           			},
+       	        	{icon: './resources/icons/GoodMark.gif',
+       	        	itemId: 'agreeButton',
+       	            scope: this,
+       	            tooltip: 'Agree',
+       	            handler: this.onAgreeClick,
+       	            disabled: true},
+       	            {icon: './resources/icons/BadMark.gif',
+       	        	itemId: 'disagreeButton',
+       	            scope: this,
+       	            tooltip: 'Disagree',
+       	            handler: this.onDisagreeClick,
+       	            disabled: true},]
+       			    }],
+       			 columns: [
+              		        { text: 'Contributor', dataIndex: 'author'}, 
+              		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
+              		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+              		        	var keywords = new Array();
+              		        	var tagsStore = record.tags();
+              		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
+              						var tag = tagsStore.getAt(i);
+              		        		var keyword = tag.get('keyword');
+              		        		keywords[i] = keyword;
+              					}
+              		        	
+              		        	return keywords;
+              		        }}
+       		    ],
+       		    listeners: {
+       	    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
+       	    		//only enable other buttons depending on author<->user relationship
+       	    		this.down('#agreeButton').setDisabled(true);
+       	    		this.down('#disagreeButton').setDisabled(true);
+       	    	}}
+             }]},
+     ]
 
  this.callParent(arguments);
 },
+
 
 onAgreeClick: function() {
 	var grid = this.getActiveTab();
@@ -585,6 +686,22 @@ updateTotals: function(concernId, operation){
 		currentConcern.set('replies', replies);
 	} 	
 	
+},
+
+loadSummaryStore: function(){
+		
+		summaryStore = Ext.data.StoreManager.lookup('SPTKeywordSummary');
+		concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	  	concernsStore.each(function(item){ 
+	  		var tagsStore = item.tags();
+	  		tagsStore.each(function(item){
+	  			if (summaryStore.find('keyword', item.get('keyword')) == -1){
+	  				summaryStore.add({keyword: item.get('keyword'), times: item.get('times')});
+	  			}
+	  		});
+	  	});
+	  	
+	  	console.log(summaryStore);
 }
 
 });
