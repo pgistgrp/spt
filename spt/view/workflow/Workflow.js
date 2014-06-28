@@ -19,6 +19,7 @@ initComponent: function() {
 			itemId:'workflowCombobox',
 			fieldLabel: 'Choose a discussion topic:',
 			labelWidth: 150,
+			labelStyle: 'color: #15428b; font-size: 12px;',
 			width:375,
 			displayField: 'name',
 			valueField: 'id',

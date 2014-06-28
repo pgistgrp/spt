@@ -13,6 +13,7 @@ Ext.define('SPT.view.bct.Brainstorm' ,{
 
 initComponent: function() {
 	 var currentConcern = null;
+	 var currentFilter = null;
 	 this.editing = Ext.create('Ext.grid.plugin.CellEditing');
 	 this.editing.clicksToEdit = 1;
 	 
@@ -45,7 +46,7 @@ initComponent: function() {
         		},
         		items: [{
             		fieldLabel: 'Please provide your comments and select at least 2 keywords or phrases',
-            		labelStyle: 'color: #15428b; font-size: 11px; font-weight:bold;',
+            		labelStyle: 'color: #15428b; font-size: 12px;',
             		name: 'feedbackTextArea',
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
@@ -201,7 +202,7 @@ initComponent: function() {
    				    {xtype:'label',
 					itemId: 'feedbackReview',
 					text: '',
-					style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
+					style: 'color: #15428b; font-size: 12px; padding:5px',
 					width: 350,
 					shrinkWrap: 2
 					},              
@@ -274,14 +275,10 @@ initComponent: function() {
        		    	}}
        		  },
       		  
-       		{title: 'Assess Summary',
+       		{title: 'Assess Progress',
        		xtype: 'form',
-            padding: '5 0 0 5',
-            border: false,
-            collapsible: true,
-            itemId: 'keywordSummaryForm',
+            itemId: 'keywordSummaryView',
         	frame: true,
-        	autoHeight: true,
     		width: 500,
     		layout: {
     	        type: 'table',
@@ -291,14 +288,14 @@ initComponent: function() {
                 {xtype:'label',
                 colspan: 2,	
                 itemId: 'instructions',
-                text: 'Review participants\' keywords and keyphrases, and vote to move to synthesis phase if topics have been sufficiently covered.',
-                style: 'color: #15428b; font-size: 11px; font-weight:bold;'
+                text: 'Explore participants\' keywords and keyphrases, discuss and vote to move to forward when satisfied.',
+                style: 'color: #15428b; font-size: 12px;',
                 },
        			{xtype: 'grid',
-                selType: 'cellmodel',
+                selType: 'rowmodel',
                 itemId: 'keywordSummaryGrid',
                 store: Ext.data.StoreManager.lookup('SPTKeywordSummary'),
-                height: 400, //need to define a height so that grid scrolls
+                height: 500, //need to define a height so that grid scrolls
                 width:150,
            		forceFit: true,
            		columns: [
@@ -307,7 +304,6 @@ initComponent: function() {
 					}}
             	],
          		listeners:{
-         			beforerender: this.loadSummaryStore,
          			select: function(rowModel, record, rowIndex, colIndex, eOpts) {
          				var filter = record.get('keyword');
          				var tab = this.findParentByType('tabpanel');
@@ -320,8 +316,8 @@ initComponent: function() {
                 selType: 'cellmodel',
                 itemId: 'concernSummaryGrid',
                 store: Ext.data.StoreManager.lookup('SPTConcerns'),
-                height: 400, //need to define a height so that grid scrolls
-                width: 350,
+                height: 500, //need to define a height so that grid scrolls
+                width: 340,
        		    forceFit: true,
        		    viewConfig:{itemId: 'concernSummaryGridView'},
        		    dockedItems: [
@@ -342,26 +338,8 @@ initComponent: function() {
        	                scope: this,
        	                tooltip: 'Remove Filter',
        	                handler: this.onRemoveFilterClick,
-       	            },
-       	            {xtype:'label',
-           	            itemId: 'instructions',
-           				text: 'Move forward?',
-           				style: 'color: #15428b; font-size: 11px; font-weight:bold; padding:5px',
-          
-           			},
-       	        	{icon: './resources/icons/GoodMark.gif',
-       	        	itemId: 'agreeButton',
-       	            scope: this,
-       	            tooltip: 'Agree',
-       	            handler: this.onAgreeClick,
-       	            disabled: true},
-       	            {icon: './resources/icons/BadMark.gif',
-       	        	itemId: 'disagreeButton',
-       	            scope: this,
-       	            tooltip: 'Disagree',
-       	            handler: this.onDisagreeClick,
-       	            disabled: true},]
-       			    }],
+       	            }]
+       			 }],
        			 columns: [
               		        { text: 'Contributor', dataIndex: 'author'}, 
               		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
@@ -388,9 +366,15 @@ initComponent: function() {
     	            pluginId: 'expander',
     	            rowBodyTpl : [ '<p><b>Feedback:</b> {content}</p>' ]
     		    }]
-             }]},
-     ]
-
+             }],
+    	    listeners:{
+    	    	afterrender: function(){
+     				this.down('#keywordSummaryGrid').getSelectionModel().select(0);
+     			},
+    	    }
+    	},
+     ];
+	 
  this.callParent(arguments);
 },
 
@@ -507,16 +491,24 @@ onReplyClick: function() {
 onTabChange: function(tabPanel, newCard, oldCard, eOpts){
 	if(oldCard.itemId == 'replyView'){
 		tabPanel.child('#replyView').tab.hide();
-	} else if (oldCard.itemId == 'keywordSummaryForm' && newCard.itemId == 'feedbackView'){
+	}else if (oldCard.itemId == 'keywordSummaryView'){
+		
+		var owner = tabPanel.ownerCt;
+    	owner.child('#reviewPanel').hide();
+    	
+    	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		concernsStore.clearFilter(false);
+		
+		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
+		if (filter != "")
+			tabPanel.doFilter(filter);
+    	
+	} else if (oldCard.itemId == 'feedbackView' && newCard.itemId == 'keywordSummaryView'){
 		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
 		concernsStore.clearFilter(false);
-		tabPanel.down('#filterTxt').reset();
-	} else if (oldCard.itemId == 'feedbackView' && newCard.itemId == 'keywordSummaryForm'){
-		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
-		concernsStore.clearFilter(false);
-		console.log(tabPanel);
-		var form = tabPanel.getActiveTab();
-		form.down('#filterTxt').reset();
+		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
+		if (filter != "")
+			tabPanel.doFilter(filter);
 	}
 },
 
@@ -593,7 +585,7 @@ onEdit: function(editor, e){
 		//do nothing, user clicked in cell and left without changing
 	}
 	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
-		replyStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
+		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
@@ -707,21 +699,6 @@ updateTotals: function(concernId, operation){
 		currentConcern.set('replies', replies);
 	} 	
 	
-},
-
-loadSummaryStore: function(){
-		
-		summaryStore = Ext.data.StoreManager.lookup('SPTKeywordSummary');
-		concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
-		concernsStore.clearFilter(false);
-	  	concernsStore.each(function(item){ 
-	  		var tagsStore = item.tags();
-	  		tagsStore.each(function(item){
-	  			if (summaryStore.find('keyword', item.get('keyword')) == -1){
-	  				summaryStore.add({keyword: item.get('keyword'), times: item.get('times')});
-	  			}
-	  		});
-	  	});
 }
 
 });

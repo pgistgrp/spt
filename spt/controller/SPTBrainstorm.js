@@ -14,6 +14,9 @@ Ext.define('SPT.controller.SPTBrainstorm', {
         ],
 
     init: function() {
+    	
+    	this.getSPTKeywordSummaryStore().addListener('datachanged', this.selectKeyword, this);
+    	
         this.control({
             
             'brainstorm button[action=getkeywords]': {
@@ -34,6 +37,10 @@ Ext.define('SPT.controller.SPTBrainstorm', {
             
             'brainstorm #feedbackView': {
                 beforeactivate: this.showConcerns
+            },
+            
+            'brainstorm #keywordSummaryView': {
+                beforeactivate: this.showDRT
             }
         });
     },
@@ -192,7 +199,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 		        	
 		        	concernStore.getProxy().url = originalUrl;
         		}else{//in edit mode
-        			concernStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcern/'
+        			concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcern/'
         			+ concernId
         			+ '/'+ encodedFeedback
         			+ '/'+ selectedTagsString;
@@ -250,6 +257,18 @@ Ext.define('SPT.controller.SPTBrainstorm', {
     	     }
     	  } else
     		  return null;
+    },
+    
+    //DRT = Discuss and Review Tool
+    showDRT: function (view){
+    	var owner = view.ownerCt;
+    	var viewport = owner.ownerCt;
+    	viewport.child('#reviewPanel').show();
+    },
+    
+    selectKeyword: function(){
+    	var bp = this.getBrainstormPanel();
+    	bp.down('#keywordSummaryGrid').getSelectionModel().select(0);
     }
     	  	
     	  	

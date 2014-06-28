@@ -14,6 +14,9 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
     init: function() {
     	//once specific workflow is selected & loaded, get associated concerns
        this.getSPTWorkflowStore().addListener('load',this.getConcerns, this);
+       
+       //once concerns loaded get keyword summary
+       this.getSPTConcernsStore().addListener('load', this.getKeywordSummary, this);
     	
        this.control({
             'workflow combobox': {
@@ -54,9 +57,30 @@ Ext.define('SPT.controller.SPTWorkflowInit', {
         	    console.log('getconcerns');
         	});
         	
+        	
+        	
         	concernsStore.getProxy().url = originalUrl;
     	}
     },
+    
+    getKeywordSummary: function(){
+    	summaryStore = Ext.data.StoreManager.lookup('SPTKeywordSummary');
+    	summaryStore.removeAll(false);
+    	
+		concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		concernsStore.clearFilter(false);
+	  	concernsStore.each(function(item){ 
+	  		var tagsStore = item.tags();
+	  		tagsStore.each(function(item){
+	  			if (summaryStore.findExact('keyword', item.get('keyword')) == -1){
+	  				summaryStore.add({keyword: item.get('keyword'), times: item.get('times')});
+	  				summaryStore.sort('times', 'DESC');
+	  			}
+	  		});
+	  	});
+	  	
+    },
+    
     
     setCurrentWorkflow: function(combobox){
     	//switch user's current workflow by changing selected status

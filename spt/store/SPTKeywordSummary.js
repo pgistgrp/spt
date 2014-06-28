@@ -7,3 +7,4 @@ Ext.define('SPT.store.SPTKeywordSummary', {
 		      {name: 'times', type: 'int'}]
 });
 	
+//no proxy specified because in memory store

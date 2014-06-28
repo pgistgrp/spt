@@ -5,7 +5,7 @@ Ext.define('SPT.store.SPTWorkflows', {
     autoLoad: false,
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/WorkflowAgent/getOpenWorkflows/',
+        url : 'http://localhost:8080/dwr/jsonp/WorkflowAgent/getOpenWorkflows/',
         reader: {
             type: 'json',
 			root: 'reply',

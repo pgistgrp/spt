@@ -18,14 +18,15 @@ Ext.define('SPT.controller.SPTLogin', {
     		username = cookie;
     	 	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'csf';
     	 }else{
-    		username = CG.global.Env.authuser;
-    	    token = CG.global.Env.token;
-    		//username = 'roderimj';
-        	//token = 'cybergis_token_dsNqvgYuwaPHQUQX';
+    		//username = CG.global.Env.authuser;
+    	    //token = CG.global.Env.token;
+    		username = 'roderimj';
+        	token = 'cybergis_token_kXGhCHttZKQ2IuBv';
         	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
     	 }
     			
     	loginStore.load(function(records, operation, success) {
+    		console.log('load user');
     		var record = loginStore.getAt(0);
     		if(! record.get('successful')){
     			  Ext.Msg.show({
