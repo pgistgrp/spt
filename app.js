@@ -51,12 +51,12 @@ Ext.application({
                 {
                 	region: 'west',
                 	xtype:'brainstorm',
-                	title:'Brainstorm',
+                	title:'Brainstorm'
                 },
                 {
                 	region: 'center',
                 	xtype:'review',
-                	title:'Discuss & Review',
+                	title:'Review, Discuss, & Conclude',
                 	maxWidth: 400,
                 	hidden: true,
                 }

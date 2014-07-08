@@ -45,7 +45,7 @@ initComponent: function() {
             	msgTarget: 'side',
         		},
         		items: [{
-            		fieldLabel: 'Please provide your comments and select at least 2 keywords or phrases',
+            		fieldLabel: 'Please provide comments and select at least 2 keywords or phrases',
             		labelStyle: 'color: #15428b; font-size: 12px;',
             		name: 'feedbackTextArea',
 					itemId: 'feedbackTextArea',
@@ -275,7 +275,7 @@ initComponent: function() {
        		    	}}
        		  },
       		  
-       		{title: 'Assess Progress',
+       		{title: 'Assess Feedback',
        		xtype: 'form',
             itemId: 'keywordSummaryView',
         	frame: true,
@@ -288,7 +288,7 @@ initComponent: function() {
                 {xtype:'label',
                 colspan: 2,	
                 itemId: 'instructions',
-                text: 'Explore participants\' keywords and keyphrases, discuss and vote to move to forward when satisfied.',
+                text: 'Explore participants\' keywords and keyphrases, discuss and vote to move to forward when satisfied that sufficient feedback has been provided.',
                 style: 'color: #15428b; font-size: 12px;',
                 },
        			{xtype: 'grid',
@@ -299,11 +299,24 @@ initComponent: function() {
                 width:150,
            		forceFit: true,
            		columns: [
-            		{header: 'Keywords/Keyphrases', dataIndex: 'keyword', renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
+            		{header: 'Keywords/Keyphrases', dataIndex: 'keyword', hideable: false, renderer: function(value, metaData, record, rowIndex, colIndex, store, view){
        		        	return record.get('keyword') + ' (' + record.get('times') + ')';
 					}}
             	],
          		listeners:{
+         			afterrender: function(grid) {        
+                        var menu = grid.headerCt.getMenu();
+                        menu.add([{
+                                text: 'Sort Asc by Count',
+                                handler: function () {
+                                        grid.getStore().sort('times', 'ASC');
+                                }},
+                                {
+                                    text: 'Sort Desc by Count',
+                                    handler: function() {
+                                        grid.getStore().sort('times', 'DESC');
+                                 }}]);           
+         			},
          			select: function(rowModel, record, rowIndex, colIndex, eOpts) {
          				var filter = record.get('keyword');
          				var tab = this.findParentByType('tabpanel');
@@ -355,12 +368,6 @@ initComponent: function() {
               		        	return keywords;
               		        }}
        		    ],
-       		    listeners: {
-       	    	select: function(rowModel, record, rowIndex, colIndex, eOpts) {
-       	    		//only enable other buttons depending on author<->user relationship
-       	    		this.down('#agreeButton').setDisabled(true);
-       	    		this.down('#disagreeButton').setDisabled(true);
-       	    	}},
        	    	plugins: [{
     		    	ptype: 'allrowexpander',
     	            pluginId: 'expander',
@@ -670,6 +677,7 @@ onRemoveFilterClick: function(){
 	filterTxtfield.reset();
 	
 },
+
 
 checkOwner: function(editor, e, eOpts){
 	var userStore = Ext.data.StoreManager.lookup('SPTUser');

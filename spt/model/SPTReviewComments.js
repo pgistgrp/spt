@@ -2,7 +2,7 @@
     extend: 'Ext.data.Model',
     fields:['id', 'workflowId', 'title', 'content', {name: 'createTime', type: 'date', dateFormat: 'm/d/y h:iA'}, 
             {name: 'author', mapping: 'author.loginname'},'numAgree', 'numVote', 
-            {name: 'deleted', type: 'boolean'}]
+            {name: 'deleted', type: 'boolean'}, {name: 'voted', type: 'boolean'}, {name: 'agree', type: 'boolean'}]
 });
  
  

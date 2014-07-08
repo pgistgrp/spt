@@ -1,8 +1,7 @@
  Ext.define('SPT.model.SPTReviewCommentVote', {
     extend: 'Ext.data.Model',
-    fields:[]//fields are empty because DRTAgent.setVoting only return whether successful or not
+    fields:[]
 });
-
 
 Ext.define('SPT.store.SPTReviewCommentVote', {
     extend: 'Ext.data.Store',

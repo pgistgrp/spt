@@ -21,7 +21,7 @@ Ext.define('SPT.controller.SPTLogin', {
     		//username = CG.global.Env.authuser;
     	    //token = CG.global.Env.token;
     		username = 'roderimj';
-        	token = 'cybergis_token_kXGhCHttZKQ2IuBv';
+        	token = 'cybergis_token_8IbuOONHWZljctpR';
         	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ 'cybergis';
     	 }
     			
