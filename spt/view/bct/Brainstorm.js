@@ -53,7 +53,9 @@ initComponent: function() {
             		height:200,
     				width: 400,
             		grow: true,
-            		allowBlank: false},
+            		allowBlank: false,
+            		maxLength:700,
+            		maxLengthText: 'Your input cannot exceed 700 characters due to URL length restrictions. Please split into multiple comments.'},
             		{
         		    xtype: 'hiddenfield',
         		    name: 'concernId',
@@ -543,29 +545,39 @@ onDeleteClick: function(){
 	var grid = this.getActiveTab();
 	var view = grid.getItemId();
 	var record = grid.getSelectionModel().getSelection();
-	var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
-	
 	var store; //multi-purpose store dependng on which view is active
-	var originalUrl = deleteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 	
-	//check to see which grid view is active
 	if (view =='replyView'){
 		store = Ext.data.StoreManager.lookup('SPTConcernReplies');
-		deleteStore.getProxy().url = originalUrl + 'ConcernComment/' + record[0].data.id;
 	}else{ //feedbackView
 		store = Ext.data.StoreManager.lookup('SPTConcerns');
-		deleteStore.getProxy().url = originalUrl + 'Concern/' + record[0].data.id;
 	}
 	
-	deleteStore.load(function(records, operation, success) {
-		console.log('reply deleted');
-		store.remove(record[0]);
-	});
+	if(record[0].data.id != null){
 	
-	deleteStore.getProxy().url = originalUrl; 
+		var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
+		
+		var originalUrl = deleteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 	
-	if(view =='replyView'){ //cannot update totals in feedback view because entire concern is deleted
-		this.updateTotals(record[0].data.concernId, 'subtract');
+		//check to see which grid view is active
+		if (view =='replyView'){
+			deleteStore.getProxy().url = originalUrl + 'ConcernComment/' + record[0].data.id;
+		}else{ //feedbackView
+			deleteStore.getProxy().url = originalUrl + 'Concern/' + record[0].data.id;
+		}
+	
+		deleteStore.load(function(records, operation, success) {
+			console.log('reply deleted');
+			store.remove(record[0]);
+		});
+	
+		deleteStore.getProxy().url = originalUrl; 
+	
+		if(view =='replyView'){ //cannot update totals in feedback view because entire concern is deleted
+			this.updateTotals(record[0].data.concernId, 'subtract');
+		}
+	}else{
+		store.remove(record[0]); //just remove from grid, no call to server
 	}
 },
 
@@ -583,6 +595,17 @@ onEdit: function(editor, e){
 		replyStore.getProxy().url = originalUrl + concernId +'/' + encodedReply + '/' + workflowId;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply saved');
+			
+			//now reload replies so id is set, need id to delete
+			var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
+
+			var origUrl = repliesStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+			repliesStore.getProxy().url = repliesStore.getProxy().url + concernId;
+			
+			repliesStore.load(function(records, operation, success) {
+			});
+			
+			repliesStore.getProxy().url = origUrl;
 		});
 		
 		replyStore.getProxy().url = originalUrl; 
@@ -704,7 +727,10 @@ updateTotals: function(concernId, operation){
 		var replies = currentConcern.get('replies') + 1;
 		currentConcern.set('replies', replies);
 	}else{//subtract
-		var replies = currentConcern.get('replies') - 1;
+		var replies = currentConcern.get('replies');
+		if(replies != 0){
+			replies = replies - 1;
+		}
 		currentConcern.set('replies', replies);
 	} 	
 	
