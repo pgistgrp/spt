@@ -13,7 +13,7 @@ Ext.application({
     	'SPTLogin',
     	'SPTWorkflowInit',
     	'SPTBrainstorm',
-    	'SPTReview'
+    	//'SPTReview'
     ],
     
     
@@ -23,7 +23,7 @@ Ext.application({
     	var initController = this.getController('SPTWorkflowInit');
     	workflowStore.on({
 	    	//afterload is a custom event, store.load doesn't allow combobox.store to be set
-    		afterload: function(){initController.selectWorkflow('SPT Grid Test');}
+    		afterload: function(){initController.selectWorkflow('Viewshed Feedback');}
     	});
 
     	Ext.create('Ext.container.Viewport', {
@@ -35,30 +35,18 @@ Ext.application({
 //            closeAction: 'hide',
 //            y:100,
 //            autoScroll: true,
-            autoHeight: true,
-            maxHeight: 600,
-            minHeight: 500,
-            autoWidth: true,
-            layout: 'border',
+            layout: 'vbox',
             items: [
                	{
                     region:'north',
                     xtype: 'workflow',
-                    title: 'Discussion',
-                    maxWidth: 400
+                    title: 'Discussion'
                     
                 },
                 {
-                	region: 'west',
+                	region: 'south',
                 	xtype:'brainstorm',
                 	title:'Brainstorm'
-                },
-                {
-                	region: 'center',
-                	xtype:'review',
-                	title:'Review, Discuss, & Conclude',
-                	maxWidth: 400,
-                	hidden: true,
                 }
             ]
         });

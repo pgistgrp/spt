@@ -39,9 +39,9 @@ Ext.define('SPT.controller.SPTBrainstorm', {
                 beforeactivate: this.showConcerns
             },
             
-            'brainstorm #keywordSummaryView': {
-                beforeactivate: this.showDRT
-            }
+//            'brainstorm #keywordSummaryView': {
+//                beforeactivate: this.showDRT
+//            }
         });
     },
     
@@ -199,7 +199,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 		        	
 		        	concernStore.getProxy().url = originalUrl;
         		}else{//in edit mode
-        			concernStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcern/'
+        			concernStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcern/'
         			+ concernId
         			+ '/'+ encodedFeedback
         			+ '/'+ selectedTagsString;

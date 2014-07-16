@@ -38,7 +38,7 @@ initComponent: function() {
         		itemId: 'feedbackForm',
         		frame: true,
         		autoHeight: true,
-    			width: 400,
+    			width: 500,
     			overflowY: 'auto',
         		bodyPadding: 5,
         		fieldDefaults: {
@@ -51,7 +51,7 @@ initComponent: function() {
 					itemId: 'feedbackTextArea',
             		xtype: 'textareafield',
             		height:200,
-    				width: 375,
+    				width: 400,
             		grow: true,
             		allowBlank: false},
             		{
@@ -73,7 +73,7 @@ initComponent: function() {
        			itemId: 'feedbackView',
        			store: Ext.data.StoreManager.lookup('SPTConcerns'),
        			height: 400, //need to define a height so that grid scrolls
-       		    width: 400,
+       		    width: 500,
        		    forceFit: true,
        		    viewConfig:{itemId: 'feedbackGridView'},
        		    dockedItems: [{
@@ -132,7 +132,7 @@ initComponent: function() {
        		    columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+       		        { text: 'Keywords', sortable: false, dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
        		        	var keywords = new Array();
        		        	var tagsStore = record.tags();
        		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
@@ -196,7 +196,7 @@ initComponent: function() {
    				},
    				store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
    				height: 400, //need to define a height so that grid scrolls
-   				width: 400,
+   				width: 500,
    				forceFit: true,
    				dockedItems: [
    				    {xtype:'label',
@@ -237,7 +237,7 @@ initComponent: function() {
    				columns: [
        		        { text: 'Contributor', dataIndex: 'author'}, 
        		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-       		        { text: 'Reply', width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
+       		        { text: 'Reply', sortable:false, width: 175, dataIndex: 'content',  field: {type: 'textfield'}, renderer: function(value, metaData){
        		        	metaData.style = 'white-space: normal;'; // applied style for DIV element
        		      		return value;      
        		        }},
@@ -275,7 +275,7 @@ initComponent: function() {
        		    	}}
        		  },
       		  
-       		{title: 'Assess Feedback',
+       		{title: 'View Summary',
        		xtype: 'form',
             itemId: 'keywordSummaryView',
         	frame: true,
@@ -288,14 +288,14 @@ initComponent: function() {
                 {xtype:'label',
                 colspan: 2,	
                 itemId: 'instructions',
-                text: 'Explore participants\' keywords and keyphrases, discuss and vote to move to forward when satisfied that sufficient feedback has been provided.',
+                text: 'Explore participants\' keywords/keyphrases and related feedback.', //discuss and vote to move forward when satisfied that sufficient feedback has been provided.
                 style: 'color: #15428b; font-size: 12px;',
                 },
        			{xtype: 'grid',
                 selType: 'rowmodel',
                 itemId: 'keywordSummaryGrid',
                 store: Ext.data.StoreManager.lookup('SPTKeywordSummary'),
-                height: 500, //need to define a height so that grid scrolls
+                height: 400, //need to define a height so that grid scrolls
                 width:150,
            		forceFit: true,
            		columns: [
@@ -329,7 +329,7 @@ initComponent: function() {
                 selType: 'cellmodel',
                 itemId: 'concernSummaryGrid',
                 store: Ext.data.StoreManager.lookup('SPTConcerns'),
-                height: 500, //need to define a height so that grid scrolls
+                height: 400, //need to define a height so that grid scrolls
                 width: 340,
        		    forceFit: true,
        		    viewConfig:{itemId: 'concernSummaryGridView'},
@@ -356,7 +356,7 @@ initComponent: function() {
        			 columns: [
               		        { text: 'Contributor', dataIndex: 'author'}, 
               		        { text: 'Date', dataIndex: 'createTime', xtype: 'datecolumn',   format:'m/d/y h:iA'},
-              		        { text: 'Keywords', dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+              		        { text: 'Keywords', sortable:false, dataIndex: 'id', renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
               		        	var keywords = new Array();
               		        	var tagsStore = record.tags();
               		        	for ( var i = 0; i < tagsStore.getCount(); i++) {
@@ -501,15 +501,16 @@ onTabChange: function(tabPanel, newCard, oldCard, eOpts){
 	}else if (oldCard.itemId == 'keywordSummaryView'){
 		
 		var owner = tabPanel.ownerCt;
-    	owner.child('#reviewPanel').hide();
+    	//owner.child('#reviewPanel').hide();
     	
-    	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
-		concernsStore.clearFilter(false);
+    	if (newCard.itemId == 'feedbackView'){
+    		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+    		concernsStore.clearFilter(false);
 		
-		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
-		if (filter != "")
-			tabPanel.doFilter(filter);
-    	
+    		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
+    		if (filter != "")
+    			tabPanel.doFilter(filter);
+    	}
 	} else if (oldCard.itemId == 'feedbackView' && newCard.itemId == 'keywordSummaryView'){
 		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
 		concernsStore.clearFilter(false);
@@ -592,7 +593,7 @@ onEdit: function(editor, e){
 		//do nothing, user clicked in cell and left without changing
 	}
 	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
-		replyStore.getProxy().url = 'http://localhost:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
+		replyStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
