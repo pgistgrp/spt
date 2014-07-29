@@ -15,7 +15,7 @@ Ext.define('SPT.controller.SPTBrainstorm', {
 
     init: function() {
     	
-    	this.getSPTKeywordSummaryStore().addListener('datachanged', this.selectKeyword, this);
+    	//this.getSPTKeywordSummaryStore().addListener('datachanged', this.selectKeyword, this);
     	
         this.control({
             
