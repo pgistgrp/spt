@@ -80,7 +80,7 @@ Ext.application({
  		var mapping = mappingStore.getAt(wfIndex);
  		return defaultWorkflow = mapping.get('value');
  	} else
- 		return defaultWorkflow = 'Viewshed Feedback';
+ 		return defaultWorkflow = 'CyberGIS Gateway';
     	
     }
     

@@ -5,12 +5,11 @@ Ext.define('SPT.store.SPTWorkflowMapping', {
 		      {name: 'key', type: 'string'},
 		      {name: 'value', type: 'string'}],
 	data : [
-		      {key: 'viewshed', value: 'Viewshed Feedback'},
+		      {key: 'viewshed', value: 'Viewshed'},
 		      {key: 'spreg', value: 'CGPySAL'},
 		      {key: 'taudem', value: 'TauDEM'},
 		      {key: 'bioscope', value: 'BioScope'},
-		      {key: 'move', value: 'Move Pattern'},
-		      {key: 'spt', value:  'SPT Feedback'},
+		      {key: 'move', value: 'MovePattern'}
 		    ]
 	
 });
