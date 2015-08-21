@@ -9,10 +9,10 @@ Ext.define('SPT.store.SPTDelete', {
     model: 'SPT.model.SPTDelete',
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/BCTAgent/delete',
+        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/delete',
         reader: {
             type: 'json',
-			root: 'reply',
+			//root: 'reply',
 			successProperty: 'successful',
 			messageProperty:'reason'
         }

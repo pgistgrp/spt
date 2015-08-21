@@ -9,10 +9,10 @@ Ext.define('SPT.store.SPTReviewComment', {
     model: 'SPT.model.SPTReviewComment',
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/DRTAgent/createComment/',
+        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/DRTAgent/createComment/',
         reader: {
             type: 'json',
-			root: 'reply',
+			//root: 'reply',
 			successProperty: 'successful',
 			messageProperty:'reason'
         }

@@ -22,7 +22,7 @@ Ext.define('SPT.controller.SPTLogin', {
     	    //token = CG.global.Env.token;
     		//apihost = window.location.host;
     		username = 'roderimj';
-        	token = 'cybergis_token_wkHpLhGMcut4t0gu';
+        	token = 'cybergis_token_mB4dVeuWiaS7ATzH';
         	apihost = encodeURIComponent('sandbox.cigi.illinois.edu:443');
         	loginStore.getProxy().url =  loginStore.getProxy().url + username +'/' + token + '/'+ apihost + '/' + 'cybergis';
     	 }

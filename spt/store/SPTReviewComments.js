@@ -5,10 +5,10 @@ Ext.define('SPT.store.SPTReviewComments', {
     pageSize: 500,
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/DRTAgent/getComments/',
+        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/DRTAgent/getComments/',
         reader: {
             type: 'json',
-			root: 'reply'
+			//root: 'reply'
         }
     }
 });

@@ -4,10 +4,10 @@ Ext.define('SPT.store.SPTUser', {
     model: 'SPT.model.SPTUser',
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/SystemAgent/loadUserByName/',
+        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/SystemAgent/loadUserByName/',
         reader: {
             type: 'json',
-			root: 'reply',
+			//root: 'reply',
         }
     }
 });

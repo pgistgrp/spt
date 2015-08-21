@@ -9,10 +9,10 @@ Ext.define('SPT.store.SPTConcernReply', {
     model: 'SPT.model.SPTConcernReply',
     proxy: {
         type: 'jsonp',
-        url : 'http://localhost:8080/dwr/jsonp/BCTAgent/createConcernComment/',
+        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/createConcernComment/',
         reader: {
             type: 'json',
-			root: 'reply',
+			//root: 'reply',
 			successProperty: 'successful',
 			messageProperty:'reason'
         }
