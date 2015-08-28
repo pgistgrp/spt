@@ -18,7 +18,7 @@ initComponent: function() {
 	 this.editing.clicksToEdit = 1;
 	 
 	 this.on({tabchange: this.onTabChange,
-		 	  scope: this});
+		 	  scope: this}); 
 	 
 	 //this approach used to prevent having to add rowExpander.css to index.html of app
 	 Ext.util.CSS.createStyleSheet(".rowexpand-header .rowexpand-expand-all "
@@ -27,6 +27,16 @@ initComponent: function() {
 	+ ".rowexpand-header .rowexpand-collapse-all {"
 	+ "background-image: url(./resources/icons/row-expand-sprite.gif);"
 	+ "background-position: -25px 0; background-repeat: no-repeat; margin-left: 1px; padding-right: 6px;}", 'rowExpander.css' );
+	 
+	 
+	 //create view-global stores
+	 Ext.create('SPT.store.SPTKeywords');
+	 Ext.create('SPT.store.SPTConcern');
+	 Ext.create('SPT.store.SPTDelete');
+	 Ext.create('SPT.store.SPTConcernReply'); 
+	 Ext.create('SPT.store.SPTConcernReplies'); 
+	 Ext.create('SPT.store.SPTCommentVote'); 
+	 Ext.create('SPT.store.SPTVote'); 
 	 
 	 this.items = [
             {
@@ -65,7 +75,10 @@ initComponent: function() {
 				buttons: [{
             	text: 'Continue',
             	action: 'getkeywords',
-            	itemId: 'continueBtn'
+            	itemId: 'continueBtn',
+            	listeners:{
+            		click: this.getKeywords
+            		}
             	}]
        		},
        		{
@@ -73,7 +86,7 @@ initComponent: function() {
        			xtype: 'grid',
        			selType: 'cellmodel',
        			itemId: 'feedbackView',
-       			store: Ext.data.StoreManager.lookup('SPTConcerns'),
+       			store: Ext.data.StoreManager.lookup('allConcernsStore'),
        			height: 400, //need to define a height so that grid scrolls
        		    width: 500,
        		    forceFit: true,
@@ -167,7 +180,7 @@ initComponent: function() {
     		    		this.down('#editButton').setDisabled(true);
     		    		this.down('#deleteButton').setDisabled(true);
     		    		
-    		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+    		    		var userStore = Ext.data.StoreManager.lookup('userStore');
     		    		var user = userStore.getAt(0).get('username');
     		    		if(record.get('author') == user){
     		    			this.down('#editButton').setDisabled(false);
@@ -196,7 +209,7 @@ initComponent: function() {
    					mode: 'SINGLE',
    					allowDeselect: true
    				},
-   				store: Ext.data.StoreManager.lookup('SPTConcernReplies'),
+   				store: Ext.data.StoreManager.lookup('concernRepliesStore'),
    				height: 400, //need to define a height so that grid scrolls
    				width: 500,
    				forceFit: true,
@@ -257,7 +270,7 @@ initComponent: function() {
        		    		this.down('#agreeButton').setDisabled(true);
     		    		this.down('#disagreeButton').setDisabled(true);
        		    		
-       		    		var userStore = Ext.data.StoreManager.lookup('SPTUser');
+       		    		var userStore = Ext.data.StoreManager.lookup('userStore');
        		    		var user = userStore.getAt(0).get('username');
        		    		if(record.get('author') == user){
        		    			this.down('#deleteButton').setDisabled(false);
@@ -330,7 +343,7 @@ initComponent: function() {
        		  	{xtype: 'grid',
                 selType: 'cellmodel',
                 itemId: 'concernSummaryGrid',
-                store: Ext.data.StoreManager.lookup('SPTConcerns'),
+                store: Ext.data.StoreManager.lookup('allConcernsStore'),
                 height: 400, //need to define a height so that grid scrolls
                 width: 340,
        		    forceFit: true,
@@ -381,7 +394,7 @@ initComponent: function() {
      				this.down('#keywordSummaryGrid').getSelectionModel().select(0);
      			},
     	    }
-    	},
+    	}, 
      ];
 	 
  this.callParent(arguments);
@@ -413,9 +426,9 @@ setVote: function(id, vote, view){
 	
 	//check to see which grid view is active
 	if (view =='replyView'){
-		voteStore = Ext.data.StoreManager.lookup('SPTCommentVote');
+		voteStore = Ext.data.StoreManager.lookup('commentVoteStore');
 	}else{ //feedbackView
-		voteStore = Ext.data.StoreManager.lookup('SPTVote');
+		voteStore = Ext.data.StoreManager.lookup('voteStore');
 	}
 	
 	var originalUrl = voteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
@@ -431,9 +444,9 @@ setVote: function(id, vote, view){
 	//update vote totals in SPTConcerns or SPT ConcernReplies store for record, rather than reloading all again
 	var store; 
 	if (view =='replyView'){
-		store = Ext.data.StoreManager.lookup('SPTConcernReplies');
+		store = Ext.data.StoreManager.lookup('concernRepliesStore');
 	}else{ //feedbackView
-		store = Ext.data.StoreManager.lookup('SPTConcerns');
+		store = Ext.data.StoreManager.lookup('allConcernsStore');
 	}
 	
 	var recordIndex = store.find('id', id);
@@ -478,7 +491,7 @@ onReplyClick: function() {
 	var record = grid.getSelectionModel().getSelection(); 
 	
 	var tab = grid.findParentByType('tabpanel');
-	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
+	var replyStore = Ext.data.StoreManager.lookup('concernRepliesStore');
 
 	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 	 replyStore.getProxy().url = replyStore.getProxy().url + record[0].data.id;
@@ -506,7 +519,7 @@ onTabChange: function(tabPanel, newCard, oldCard, eOpts){
     	//owner.child('#reviewPanel').hide();
     	
     	if (newCard.itemId == 'feedbackView'){
-    		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+    		var concernsStore = Ext.data.StoreManager.lookup('allConcernsStore');
     		concernsStore.clearFilter(false);
 		
     		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
@@ -514,7 +527,7 @@ onTabChange: function(tabPanel, newCard, oldCard, eOpts){
     			tabPanel.doFilter(filter);
     	}
 	} else if (oldCard.itemId == 'feedbackView' && newCard.itemId == 'keywordSummaryView'){
-		var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+		var concernsStore = Ext.data.StoreManager.lookup('allConcernsStore');
 		concernsStore.clearFilter(false);
 		var filter = tabPanel.getActiveTab().down('#filterTxt').getValue();
 		if (filter != "")
@@ -524,9 +537,9 @@ onTabChange: function(tabPanel, newCard, oldCard, eOpts){
 
 
 onAddClick: function(){
-    var userStore = Ext.data.StoreManager.lookup('SPTUser');
+    var userStore = Ext.data.StoreManager.lookup('userStore');
     var user = userStore.getAt(0).get('username');
-    var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
+    var repliesStore = Ext.data.StoreManager.lookup('concernRepliesStore');
     var concernid =  this.currentConcern.id;
     
 	var rec = new SPT.model.SPTConcernReplies({concernId: concernid, author: user, createTime: new Date(), content: '', numAgree: 1, numVote: 1, object: 'voted'});
@@ -548,14 +561,14 @@ onDeleteClick: function(){
 	var store; //multi-purpose store dependng on which view is active
 	
 	if (view =='replyView'){
-		store = Ext.data.StoreManager.lookup('SPTConcernReplies');
+		store = Ext.data.StoreManager.lookup('concernRepliesStore');
 	}else{ //feedbackView
-		store = Ext.data.StoreManager.lookup('SPTConcerns');
+		store = Ext.data.StoreManager.lookup('allConcernsStore');
 	}
 	
 	if(record[0].data.id != null){
 	
-		var deleteStore = Ext.data.StoreManager.lookup('SPTDelete');
+		var deleteStore = Ext.data.StoreManager.lookup('deleteStore');
 		
 		var originalUrl = deleteStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 	
@@ -584,8 +597,12 @@ onDeleteClick: function(){
 onEdit: function(editor, e){
 	e.record.commit();
 	
-	var workflowId = SPT.app.getController('SPTWorkflowInit').getCurrentWorkflowInfo().getWorkflowId();
-	var replyStore = Ext.data.StoreManager.lookup('SPTConcernReply');
+	var parent1 = this.up('#brainstormPanel');
+	var parent2 = config.parent;
+	var wfInfo = parent2.getCurrentWorkflowInfo();
+	
+	var workflowId = wfInfo.getWorkflowId();
+	var replyStore = Ext.data.StoreManager.lookup('concernReply');
 	
 	var originalUrl = replyStore.getProxy().url;
 	var concernId = e.record.get('concernId');
@@ -597,7 +614,7 @@ onEdit: function(editor, e){
 			console.log('reply saved');
 			
 			//now reload replies so id is set, need id to delete
-			var repliesStore = Ext.data.StoreManager.lookup('SPTConcernReplies');
+			var repliesStore = Ext.data.StoreManager.lookup('concernRepliesStore');
 
 			var origUrl = repliesStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 			repliesStore.getProxy().url = repliesStore.getProxy().url + concernId;
@@ -616,7 +633,7 @@ onEdit: function(editor, e){
 		//do nothing, user clicked in cell and left without changing
 	}
 	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
-		replyStore.getProxy().url = 'http://pgistdev.geog.washington.edu:8080/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
+		replyStore.getProxy().url = 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
@@ -639,6 +656,9 @@ onFeedbackEditClick: function(){
 	
 	var checkboxconfigs = [];
    	var tagsStore = record[0].tags();
+   	
+   	console.log(tagsStore);
+   	
    	for ( var i = 0; i < tagsStore.getCount(); i++) {
 		var tag = tagsStore.getAt(i);
    		var keyword = tag.get('keyword');
@@ -651,17 +671,17 @@ onFeedbackEditClick: function(){
 		});
 	}
 	
-	SPT.app.getController('SPTBrainstorm').createKeywordGUI(checkboxconfigs);
-	
-	tab.down('#continueBtn').hidden = true;
-	
-	tab.child('#feedbackForm').tab.show();
-	tab.setActiveTab('feedbackForm');
+   	tab.down('#continueBtn').hidden = true;
+   	
+   	var feedbackForm = tab.child('#feedbackForm');
+	tab.setActiveTab(feedbackForm);
+	this.createKeywordGUI(checkboxconfigs);
+	feedbackForm.tab.show();
 	
 },
 
 getFilterFromRequest: function() {
-	var filter = SPT.app.getController('SPTBrainstorm').getQueryParameter('filter');
+	var filter = this.getQueryParameter('filter');
 	if(filter != null){      
 		var grid = this.getActiveTab();
 	  	var tab = grid.findParentByType('tabpanel');
@@ -671,7 +691,7 @@ getFilterFromRequest: function() {
 },
 
 filterKeywords: function(field, e, eOpts){
-	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var concernsStore = Ext.data.StoreManager.lookup('allConcernsStore');
 	
 	var filter = field.value;
 	if (e.getKey() == e.ENTER) {
@@ -683,7 +703,7 @@ filterKeywords: function(field, e, eOpts){
 
 doFilter: function(filter){
 	
-	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var concernsStore = Ext.data.StoreManager.lookup('allConcernsStore');
     concernsStore.clearFilter(true);
     concernsStore.filter({filterFn: function(item){ 
     	var tagsStore = item.tags();
@@ -694,7 +714,7 @@ doFilter: function(filter){
 onRemoveFilterClick: function(){
 	var grid = this.getActiveTab();
 	
-	var concernsStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var concernsStore = Ext.data.StoreManager.lookup('allConcernsStore');
 	concernsStore.clearFilter(false);
 	
 	var filterTxtfield = grid.down('#filterTxt');
@@ -704,7 +724,7 @@ onRemoveFilterClick: function(){
 
 
 checkOwner: function(editor, e, eOpts){
-	var userStore = Ext.data.StoreManager.lookup('SPTUser');
+	var userStore = Ext.data.StoreManager.lookup('userStore');
 	var user = userStore.getAt(0).get('username');
 	
 	if(e.record.get('author') == user){
@@ -715,7 +735,7 @@ checkOwner: function(editor, e, eOpts){
 
 updateTotals: function(concernId, operation){
 	//update replies & views in SPTConcern store for record, rather than reloading all again
-	var concernStore = Ext.data.StoreManager.lookup('SPTConcerns');
+	var concernStore = Ext.data.StoreManager.lookup('allConcernsStore');
 	var currentConcernIndex = concernStore.find('id', concernId);
 	var currentConcern = concernStore.getAt(currentConcernIndex);
 	
@@ -734,8 +754,239 @@ updateTotals: function(concernId, operation){
 		currentConcern.set('replies', replies);
 	} 	
 	
-}
+},
 
+	getKeywords: function(button) {
+        
+		var keywordStore = Ext.data.StoreManager.lookup('keywordStore');
+		
+		var parent = this.up('#brainstormPanel');
+		var feedbackForm = this.up('#feedbackForm');
+		var feedbackTextArea = feedbackForm.down('#feedbackTextArea');
+		
+		var originalUrl = keywordStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+    	
+    	if(feedbackForm.getForm().isValid()){
+			console.log('valid');
+			var feedbackText = escape(feedbackTextArea.getValue());
+			
+			keywordStore.getProxy().url = keywordStore.getProxy().url + feedbackText;
+			keywordStore.load({
+	            callback: parent.onKeywordLoad,           
+	            scope: parent
+	        });
+				
+			button.hidden = true;
+		};
+		
+		console.log('not valid');
+		keywordStore.getProxy().url = originalUrl; //reset url to remove parameter
+    },
+    
+    onKeywordLoad: function(records){
+    	var checkboxconfigs = [];
+    	for ( var i = 0; i < records.length; i++) {
+			for(var j = 0; j < records[i].data.tags.length; j++){
+				checkboxconfigs.push({
+					name : records[i].data.tags[j],
+					inputValue : records[i].data.tags[j],
+					boxLabel : records[i].data.tags[j],
+					xtype : 'checkbox'
+				});
+			}
+		}
+		
+		this.createKeywordGUI(checkboxconfigs);
+    },
+    
+    createKeywordGUI: function(checkboxconfigs){
+    	
+    	var feedbackForm = this.getActiveTab();
+    	console.log(feedbackForm);
+    	
+    	var keywordGroup = Ext.create('Ext.form.CheckboxGroup',{
+			itemId : 'keywordGroup',
+			fieldLabel: 'Keywords/phrases',
+			columns: 1,
+			items : checkboxconfigs
+		});
+
+		var manualTag = Ext.create('Ext.form.field.Text',{
+			itemId : 'manualTag'
+		});
+		
+		var addManualButton = Ext.create('Ext.Button',{
+			text : 'Add Keyphrase',
+			action: 'addkeyword',
+			itemId: 'manualBtn',
+			listeners:{
+            	click: this.addManualTag
+            }
+		});
+
+		feedbackForm.add(keywordGroup);
+		feedbackForm.add(manualTag);
+		feedbackForm.add(addManualButton);
+		
+		var submitButton = Ext.create('Ext.Button',{
+			text : 'Submit',
+			action: 'submit',
+			itemId: 'submitBtn',
+			listeners:{
+            	click: this.saveConcern
+            }
+		});
+		var cancelButton = Ext.create('Ext.Button',{
+			text : 'Cancel',
+			action: 'cancel',
+			itemId: 'cancelBtn',
+			listeners:{
+            	click: this.cancelConcern
+            }
+		});
+		
+		feedbackForm.add(submitButton);
+		feedbackForm.add(cancelButton);
+    },
+    
+    saveConcern: function(button){
+    	var feedbackForm = this.up('#feedbackForm');
+    	var keywordGroup = feedbackForm.getComponent('keywordGroup');
+    	var selectedTags = keywordGroup.getChecked();
+        
+    	if(selectedTags.length <2){
+    		  Ext.Msg.show({
+                  title: 'SPT Help',
+                  msg: 'Please select at least 2 keywords',
+                  buttons: Ext.Msg.OK
+              });
+        }else{
+        	var concernStore = Ext.data.StoreManager.lookup('concernStore');
+        	
+        	//get keywords
+        	var selectedTagsString = '';
+        	for (i=0; i<selectedTags.length; i++){
+        		selectedTagsString += selectedTags[i].getName()+ ',';  
+        	}
+        	//add filter to keywords if provided in request
+        	var parent1 = this.up('#brainstormPanel');
+        	var filter = parent1.getQueryParameter('filter');
+        	if(filter != null){      
+        		selectedTagsString += filter;
+        	}
+        	
+        	
+        	var config = parent1.initialConfig; //getInitialConfig() method doesn't work - known bug still in ExtJS 4.2
+        	var parent2 = config.parent;
+        	
+        	var wfInfo = parent2.getCurrentWorkflowInfo();
+        	if (wfInfo == null){
+        		this.getSelectWorkflowMsg();
+        	}else{
+        		var originalUrl = concernStore.getProxy().url;
+        		var feedbackTextArea = feedbackForm.down('#feedbackTextArea');
+        		var encodedFeedback = escape(feedbackTextArea.getValue());
+        		var concernId = feedbackForm.getComponent('concernId').getValue();
+        		
+        		//check to see if new feedback 
+        		if(concernId == 'new'){
+		        	concernStore.getProxy().url = concernStore.getProxy().url
+		        		+ encodedFeedback
+		        		+ '/'+ selectedTagsString 
+		        		+ '/'+ wfInfo.getWorkflowId()
+		        		+ '/'+ wfInfo.getContextId()
+		        		+ '/'+ wfInfo.getActivityId(); 
+		        	
+		        	concernStore.load(function(records, operation, success) {
+		        		console.log("concern saved");
+		        	});
+		        	
+		        	concernStore.getProxy().url = originalUrl;
+        		}else{//in edit mode
+        			concernStore.getProxy().url = 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/editConcern/'
+        			+ concernId
+        			+ '/'+ encodedFeedback
+        			+ '/'+ selectedTagsString;
+        			
+        			concernStore.load(function(records, operation, success) {
+		        		console.log("concern edited");
+		        	});
+        		}
+	      
+	        	var parent = this.up('#brainstormPanel');
+	        	parent.resetForm();
+	        	
+	        	var workflow = parent.ownerCt.down('#workflowPanel');
+	        	workflow.getConcerns();
+        	}	
+        }
+    },
+    
+    cancelConcern: function(button){
+    	this.resetForm();
+    },
+    
+    addManualTag: function(button) {
+    	var feedbackForm = this.up('#feedbackForm');
+    	var manualTag = feedbackForm.getComponent('manualTag').getValue();
+    	if(manualTag != ""){
+    		var keywordModel = Ext.ModelManager.getModel('SPT.model.SPTKeywords');
+    		var newTag = keywordModel.create({tags: manualTag, potentialtags: '', successful: true});
+    		var keywordStore = Ext.data.StoreManager.lookup('keywordStore');
+    		keywordStore.add(newTag);
+    		keywordGroup = feedbackForm.getComponent('keywordGroup');
+        	keywordGroup.add({
+        		name : manualTag,
+				inputValue : manualTag,
+				boxLabel : manualTag,
+				xtype : 'checkbox',
+				checked: true
+			});
+    	}
+    	
+    },
+    
+    resetForm: function(){
+    	var feedbackForm = this.getActiveTab();
+    	
+    	feedbackForm.getForm().reset();
+    	
+    	feedbackForm.remove('keywordGroup');
+		feedbackForm.remove('manualTag');
+		feedbackForm.remove('manualBtn');
+		
+		feedbackForm.remove('submitBtn');
+		feedbackForm.remove('cancelBtn');
+		var continueBtn = feedbackForm.queryById('continueBtn');
+		continueBtn.setVisible(true);
+    },
+    
+    getQueryParameter: function(parameter){
+  	  var queryString = window.location.search.substring(1);
+  	  var parameterName = 'filter' + "=";
+  	  if ( queryString.length > 0 ) {
+  	    begin = queryString.indexOf ( parameterName );
+  	    if ( begin != -1 ) {
+  	      begin += parameterName.length;
+  	      end = queryString.indexOf ( "&" , begin );
+  	        if ( end == -1 ) {
+  	        	end = queryString.length
+  	        }
+  	      return unescape(queryString.substring(begin, end));
+  	     }
+  	  } else
+  		  return null;
+  },
+    
+  getSelectWorkflowMsg: function(){
+		return Ext.Msg.show({
+	        title: 'SPT Help',
+	        msg: 'Please select a discussion topic',
+	        buttons: Ext.Msg.OK
+	    });	
+	}
+       		
+       		
 });
 
 
