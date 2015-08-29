@@ -637,7 +637,7 @@ onEdit: function(editor, e){
 		//do nothing, user clicked in cell and left without changing
 	}
 	else{ //user is trying to edit an existing reply, call BCTAgent to save using replyStore proxy, but have to change url to edit method
-		replyStore.getProxy().url = 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
+		replyStore.getProxy().url = 'http://pgist.geog.uw.edu/dwr/jsonp/BCTAgent/editConcernComment/' + e.record.get('id') +'/' + encodedReply;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply updated');
 		});
@@ -907,7 +907,7 @@ updateTotals: function(concernId, operation){
 		        	
 		        	concernStore.getProxy().url = originalUrl;
         		}else{//in edit mode
-        			concernStore.getProxy().url = 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/editConcern/'
+        			concernStore.getProxy().url = 'http://pgist.geog.uw.edu/dwr/jsonp/BCTAgent/editConcern/'
         			+ concernId
         			+ '/'+ encodedFeedback
         			+ '/'+ selectedTagsString;

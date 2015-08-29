@@ -9,7 +9,7 @@ Ext.define('SPT.store.SPTReviewComment', {
     model: 'SPT.model.SPTReviewComment',
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/DRTAgent/createComment/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/DRTAgent/createComment/',
         reader: {
             type: 'json',
 			//root: 'reply',

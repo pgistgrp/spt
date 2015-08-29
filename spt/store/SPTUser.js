@@ -4,7 +4,7 @@ Ext.define('SPT.store.SPTUser', {
     model: 'SPT.model.SPTUser',
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/SystemAgent/loadUserByName/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/SystemAgent/loadUserByName/',
         reader: {
             type: 'json',
 			//root: 'reply',

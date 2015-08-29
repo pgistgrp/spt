@@ -10,7 +10,7 @@ Ext.define('SPT.store.SPTCommentVote', {
     model: 'SPT.model.SPTCommentVote',
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/setConcernCommentVoting/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/BCTAgent/setConcernCommentVoting/',
         reader: {
             type: 'json',
 			//root: 'reply',

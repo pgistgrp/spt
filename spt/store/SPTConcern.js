@@ -9,7 +9,7 @@ Ext.define('SPT.store.SPTConcern', {
     model: 'SPT.model.SPTConcern',
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/saveConcern/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/BCTAgent/saveConcern/',
         reader: {
             type: 'json',
 			//root: 'reply',

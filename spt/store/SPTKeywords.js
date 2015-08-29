@@ -4,7 +4,7 @@ Ext.define('SPT.store.SPTKeywords', {
     model: 'SPT.model.SPTKeywords',
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/BCTAgent/prepareConcern/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/BCTAgent/prepareConcern/',
         reader: {
             type: 'json',
 			//root: 'reply'

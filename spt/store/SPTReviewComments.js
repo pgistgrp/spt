@@ -5,7 +5,7 @@ Ext.define('SPT.store.SPTReviewComments', {
     pageSize: 500,
     proxy: {
         type: 'jsonp',
-        url : 'http://pgistdev.geog.uw.edu/dwr/jsonp/DRTAgent/getComments/',
+        url : 'http://pgist.geog.uw.edu/dwr/jsonp/DRTAgent/getComments/',
         reader: {
             type: 'json',
 			//root: 'reply'
