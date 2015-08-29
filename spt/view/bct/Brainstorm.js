@@ -34,7 +34,7 @@ initComponent: function() {
 	 Ext.create('SPT.store.SPTConcern');
 	 Ext.create('SPT.store.SPTDelete');
 	 Ext.create('SPT.store.SPTConcernReply'); 
-	 Ext.create('SPT.store.SPTConcernReplies'); 
+	 Ext.create('SPT.store.SPTConcernReplies');  
 	 Ext.create('SPT.store.SPTCommentVote'); 
 	 Ext.create('SPT.store.SPTVote'); 
 	 
@@ -488,27 +488,29 @@ setVote: function(id, vote, view){
 
 onReplyClick: function() {
 	var grid = this.getActiveTab();
+	
 	var record = grid.getSelectionModel().getSelection(); 
 	
 	var tab = grid.findParentByType('tabpanel');
+	tab.currentConcern =  record[0].data;
+	
 	var replyStore = Ext.data.StoreManager.lookup('concernRepliesStore');
 
-	 var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+	var originalUrl = replyStore.getProxy().url; //workaround: temp variable for storing proxy url without param
 	 replyStore.getProxy().url = replyStore.getProxy().url + record[0].data.id;
 	
 	 replyStore.load(function(records, operation, success) {
 		 console.log(records);
 	 });
 	 
-	 tab.currentConcern =  record[0].data;
+	 replyStore.getProxy().url = originalUrl;
 	 
 	 var replyView = tab.child('#replyView');
 	 replyView.getComponent('feedbackReview').setText('Feedback from ' + tab.currentConcern.author + ': ' + tab.currentConcern.content);
 	 replyView.tab.show();
 	 tab.setActiveTab('replyView');
-	 
-	 replyStore.getProxy().url = originalUrl;
 },
+
 
 onTabChange: function(tabPanel, newCard, oldCard, eOpts){
 	if(oldCard.itemId == 'replyView'){
@@ -598,6 +600,7 @@ onEdit: function(editor, e){
 	e.record.commit();
 	
 	var parent1 = this.up('#brainstormPanel');
+	var config = parent1.initialConfig; //getInitialConfig() method doesn't work - known bug still in ExtJS 4.2
 	var parent2 = config.parent;
 	var wfInfo = parent2.getCurrentWorkflowInfo();
 	
@@ -612,20 +615,21 @@ onEdit: function(editor, e){
 		replyStore.getProxy().url = originalUrl + concernId +'/' + encodedReply + '/' + workflowId;
 		replyStore.load(function(records, operation, success) {
 			console.log('reply saved');
+			replyStore.getProxy().url = originalUrl; 
 			
-			//now reload replies so id is set, need id to delete
-			var repliesStore = Ext.data.StoreManager.lookup('concernRepliesStore');
-
-			var origUrl = repliesStore.getProxy().url; //workaround: temp variable for storing proxy url without param
-			repliesStore.getProxy().url = repliesStore.getProxy().url + concernId;
-			
-			repliesStore.load(function(records, operation, success) {
-			});
-			
-			repliesStore.getProxy().url = origUrl;
 		});
 		
-		replyStore.getProxy().url = originalUrl; 
+		//now reload replies so id is set, need id to delete
+		var repliesStore = Ext.data.StoreManager.lookup('concernRepliesStore');
+
+		var origUrl = repliesStore.getProxy().url; //workaround: temp variable for storing proxy url without param
+		repliesStore.getProxy().url = repliesStore.getProxy().url + concernId;
+		
+		repliesStore.load(function(records, operation, success) {
+		});
+		
+		repliesStore.getProxy().url = origUrl;
+		
 		var tab = e.grid.findParentByType('tabpanel');
 		tab.updateTotals(concernId, 'add');
 		
