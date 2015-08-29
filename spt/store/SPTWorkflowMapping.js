@@ -9,7 +9,8 @@ Ext.define('SPT.store.SPTWorkflowMapping', {
 		      {key: 'spreg', value: 'CGPySAL'},
 		      {key: 'taudem', value: 'TauDEM'},
 		      {key: 'bioscope', value: 'BioScope'},
-		      {key: 'move', value: 'MovePattern'}
+		      {key: 'flumapper', value: 'FluMapper'},
+		      {key: 'geoenrichment', value: 'ESRI GeoEnrichment'}
 		    ]
 	
 });
